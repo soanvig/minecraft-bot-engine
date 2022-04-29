@@ -26,5 +26,9 @@
   "require": [
    "ts-node/register"
   ]
+ },
+ "dependencies": {
+  "mineflayer": "4.2.0",
+  "smart-buffer": "^4.2.0"
  }
 }

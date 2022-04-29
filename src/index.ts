@@ -1,1 +1,3 @@
-export const helloWorld = () => 'Hello World!';
+import { start } from './protocol/protocol';
+
+start();
