@@ -1,6 +1,12 @@
 import { SmartBuffer as OriginalSmartBuffer } from 'smart-buffer';
 
 export class SmartBuffer extends OriginalSmartBuffer {
+  public static fromBuffer (buff: Buffer, encoding?: BufferEncoding): SmartBuffer {
+    return new this({
+      buff,
+      encoding,
+    });
+  }
 
   /** @TODO add tests */
   public writeVarInt (int: number): SmartBuffer {
@@ -32,7 +38,7 @@ export class SmartBuffer extends OriginalSmartBuffer {
   }
 
   /** @TODO add tests */
-  public readVarInt = (buf: Buffer): number => {
+  public readVarInt (): number {
     const MSB = 0x80;
     const REST = 0x7F;
 
@@ -40,21 +46,22 @@ export class SmartBuffer extends OriginalSmartBuffer {
     let shift = 0;
     let counter = 0;
     let b;
-    const l = buf.length;
+    const buffer = (this as any)._buff;
 
     do {
-      if (counter >= l || shift > 49) {
+      if (shift > 49) {
         throw new RangeError('Could not decode varint');
       }
-      b = buf[counter++];
+      b = buffer[this.readOffset + counter];
+      counter += 1;
       res += shift < 28
         ? (b & REST) << shift
         : (b & REST) * Math.pow(2, shift);
       shift += 7;
     } while (b >= MSB);
 
-    (this as any)._readOffset += counter;
+    this.readOffset += counter;
 
     return res;
-  };
+  }
 }

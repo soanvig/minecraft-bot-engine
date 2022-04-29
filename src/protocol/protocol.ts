@@ -12,7 +12,7 @@ export const start = () => {
   socket.on('connect', () => {
     console.log('Connected');
 
-    socket.on('data', console.log);
+    socket.on('data', readStatusResponse);
     socket.on('end', () => console.log('End'));
     socket.on('close', () => console.log('Close'));
     socket.on('error', () => console.log('Error'));
@@ -21,17 +21,46 @@ export const start = () => {
       console.log('Ready');
 
       socket.write(createHandshakePacket());
-      socket.write(createLoginPacket());
+      socket.write(createPingPacket());
     });
   });
 };
 
-const readEncryptionRequest = (inputBuffer: Buffer) => {
-  // const { value: length, rest: restA } = decodeVarInt(inputBuffer);
-  // const { value: packetId, rest: restB } = decodeVarInt(restA);
+const readStatusResponse = (inputBuffer: Buffer) => {
+  const buffer = SmartBuffer.fromBuffer(inputBuffer);
+  const packetLength = buffer.readVarInt();
+  const packetId = buffer.readVarInt();
+  const responseLength = buffer.readVarInt();
+  const response = buffer.readString('utf-8');
+
+  console.log({
+    packetLength,
+    packetId,
+    response: JSON.parse(response),
+  });
 };
 
-console.log(new SmartBuffer().writeVarInt(128).toBuffer());
+const readEncryptionResponse = (inputBuffer: Buffer) => {
+  const buffer = SmartBuffer.fromBuffer(inputBuffer);
+
+  const packetLength = buffer.readVarInt();
+  const packetId = buffer.readVarInt();
+  const serverId = buffer.readBuffer(20);
+  const publicKeyLength = buffer.readVarInt();
+  const publicKey = buffer.readBuffer(publicKeyLength);
+  const verifyTokenLength = buffer.readVarInt();
+  const verifyToken = buffer.readBuffer(verifyTokenLength);
+
+  console.log({
+    packetLength,
+    packetId,
+    serverId,
+    publicKeyLength,
+    publicKey,
+    verifyTokenLength,
+    verifyToken,
+  });
+};
 
 const createHandshakePacket = () => {
   const data = new SmartBuffer();
@@ -47,7 +76,7 @@ const createHandshakePacket = () => {
   data.writeUInt16BE(port);
 
   // Next state (1 status, 2 login) - VarInt Enum
-  data.writeVarInt(2);
+  data.writeVarInt(1);
 
   return buildPacket(0, data.toBuffer());
 };
@@ -60,4 +89,11 @@ const createLoginPacket = () => {
 
   return buildPacket(0, data.toBuffer());
 };
+
+const createPingPacket = () => {
+  const data = new SmartBuffer();
+
+  return buildPacket(0, data.toBuffer());
+};
+
 
