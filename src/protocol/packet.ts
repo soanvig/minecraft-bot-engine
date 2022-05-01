@@ -1,6 +1,12 @@
 import { SmartBuffer } from './SmartBuffer';
 
-export const buildPacket = (id: number, data: Buffer) => {
+export interface Packet {
+  id: number;
+  length: number;
+  data: SmartBuffer;
+}
+
+export const encodePacket = (id: number, data: Buffer) => {
   const idField = new SmartBuffer();
   idField.writeVarInt(id);
 
@@ -12,4 +18,18 @@ export const buildPacket = (id: number, data: Buffer) => {
     idField.toBuffer(),
     data,
   ]);
+};
+
+export const decodePacket = (packet: Buffer): Packet => {
+  const smartBuffer = SmartBuffer.fromBuffer(packet);
+
+  const length = smartBuffer.readVarInt();
+  const id = smartBuffer.readVarInt();
+  const data = smartBuffer;
+
+  return {
+    id,
+    length,
+    data: SmartBuffer.fromBuffer(data.readBuffer()),
+  };
 };
