@@ -6,7 +6,7 @@
  "author": "Mateusz Koteja <soanvig@gmail.com>",
  "scripts": {
   "build": "yarn tsc",
-  "start": "ts-node ./src/index.ts",
+  "start": "ts-node -T ./src/index.ts",
   "test": "ava"
  },
  "devDependencies": {

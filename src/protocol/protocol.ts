@@ -1,18 +1,20 @@
 import net from 'net';
 import { buildPacket } from './packet';
 import { SmartBuffer } from './SmartBuffer';
+import { publicEncrypt, randomBytes } from 'crypto';
 
 const host = 'localhost';
-const port = 51114;
+const port = 25565;
 const username = 'Bot';
 const protocolVersionNumber = 758; // https://wiki.vg/Protocol#Handshaking
 
+const socket = net.connect(port, host);
+
 export const start = () => {
-  const socket = net.connect(port, host);
   socket.on('connect', () => {
     console.log('Connected');
 
-    socket.on('data', readStatusResponse);
+    socket.on('data', readEncryptionResponse);
     socket.on('end', () => console.log('End'));
     socket.on('close', () => console.log('Close'));
     socket.on('error', () => console.log('Error'));
@@ -21,7 +23,7 @@ export const start = () => {
       console.log('Ready');
 
       socket.write(createHandshakePacket());
-      socket.write(createPingPacket());
+      socket.write(createLoginPacket());
     });
   });
 };
@@ -41,25 +43,47 @@ const readStatusResponse = (inputBuffer: Buffer) => {
 };
 
 const readEncryptionResponse = (inputBuffer: Buffer) => {
+  console.log('Received something :)');
+
   const buffer = SmartBuffer.fromBuffer(inputBuffer);
 
   const packetLength = buffer.readVarInt();
   const packetId = buffer.readVarInt();
-  const serverId = buffer.readBuffer(20);
-  const publicKeyLength = buffer.readVarInt();
-  const publicKey = buffer.readBuffer(publicKeyLength);
-  const verifyTokenLength = buffer.readVarInt();
-  const verifyToken = buffer.readBuffer(verifyTokenLength);
 
   console.log({
     packetLength,
     packetId,
-    serverId,
-    publicKeyLength,
-    publicKey,
-    verifyTokenLength,
-    verifyToken,
-  });
+  })
+
+  if (packetId === 1) {
+    const serverIdLength = buffer.readVarInt();
+    const serverId = buffer.readBuffer(serverIdLength);
+    const publicKeyLength = buffer.readVarInt();
+    const publicKey = buffer.readBuffer(publicKeyLength);
+    const verifyTokenLength = buffer.readVarInt();
+    const verifyToken = buffer.readBuffer(verifyTokenLength);
+
+    console.log({
+      packetLength,
+      packetId,
+      serverIdLength,
+      serverId,
+      publicKeyLength,
+      publicKey,
+      publicKeyBase64: publicKey.toString('base64'),
+      verifyTokenLength,
+      verifyToken,
+    });
+
+    const publicKeyPEM = publicKeyDerToPem(publicKey);
+    const sharedSecret = randomBytes(16);
+    const encryptedSharedSecret = publicEncrypt(publicKeyPEM, sharedSecret);
+    const encryptedVerifyToken = publicEncrypt(publicKeyPEM, verifyToken);
+    
+    socket.write(createEncryptionPacket(encryptedSharedSecret, encryptedVerifyToken));
+  } else {
+    console.log(`Packet id: ${packetId}. Skipping`);
+  }
 };
 
 const createHandshakePacket = () => {
@@ -76,7 +100,7 @@ const createHandshakePacket = () => {
   data.writeUInt16BE(port);
 
   // Next state (1 status, 2 login) - VarInt Enum
-  data.writeVarInt(1);
+  data.writeVarInt(2);
 
   return buildPacket(0, data.toBuffer());
 };
@@ -96,4 +120,24 @@ const createPingPacket = () => {
   return buildPacket(0, data.toBuffer());
 };
 
+const createEncryptionPacket = (sharedSecret: Buffer, verifyToken: Buffer) => {
+  const data = new SmartBuffer();
 
+  // @NOTE something is wrong and it doesn't work - minecraft server
+  // returns protocol error
+    
+  data.writeVarInt(sharedSecret.length);
+  data.writeBuffer(sharedSecret);
+  data.writeVarInt(verifyToken.length);
+  data.writeBuffer(verifyToken);
+
+  return buildPacket(1, data.toBuffer());
+}
+
+const publicKeyDerToPem = (key: Buffer): string => {
+  return [
+    '-----BEGIN PUBLIC KEY-----',
+    key.toString('base64'),
+    '-----END PUBLIC KEY-----'
+  ].join('\n');
+}
