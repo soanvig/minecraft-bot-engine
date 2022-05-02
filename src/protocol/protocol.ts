@@ -3,6 +3,7 @@ import { decodeCompressedPacket, decodePacket, encodePacket } from './packet';
 import { StateManager } from './states/StateManager';
 import { StateHandshake } from './states/StateHandshake';
 import { StateLogin } from './states/StateLogin';
+import { StatePlay } from './states/StatePlay';
 
 const host = 'localhost';
 const port = 25565;
@@ -25,6 +26,7 @@ export const start = () => {
         states: [
           new StateHandshake(),
           new StateLogin(),
+          new StatePlay(),
         ],
         onSend: (id, data) => {
           const packet = encodePacket(id, data);

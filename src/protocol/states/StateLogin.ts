@@ -15,6 +15,19 @@ export class StateLogin extends State {
 
       this.enableCompression(maxPacketSize);
     }
+
+    if (packet.id === 2) {
+      // md5(OfflinePlayer:Nickname)
+      const uuid = packet.data.readBuffer(16);
+      console.log('Player uuid', uuid.toString('hex'));
+
+      const nicknameLength = packet.data.readVarInt();
+      const nickname = packet.data.readString(nicknameLength);
+
+      console.log('Login nickname', nickname);
+
+      this.switchTo(3);
+    }
   }
 
   public onSwitchTo (): void {

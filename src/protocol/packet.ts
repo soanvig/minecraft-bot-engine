@@ -60,7 +60,7 @@ export const decodeCompressedPacket = (compressionThreshold: number, packet: Buf
 
   return {
     id,
-    length: packetLength,
+    length: dataLength,
     data: SmartBuffer.fromBuffer(data.readBuffer()),
   };
 };
