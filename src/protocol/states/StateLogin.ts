@@ -7,7 +7,15 @@ const username = 'Bot';
 export class StateLogin extends State {
   public readonly id = 2;
 
-  public receive (packet: Packet): void {}
+  public receive (packet: Packet): void {
+    console.log('login', packet.id, packet.length);
+
+    if (packet.id === 3) {
+      const maxPacketSize = packet.data.readVarInt();
+
+      this.enableCompression(maxPacketSize);
+    }
+  }
 
   public onSwitchTo (): void {
     this.send(0, createLoginPacket());

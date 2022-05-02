@@ -1,11 +1,12 @@
 import net from 'net';
-import { decodePacket, encodePacket } from './packet';
+import { decodeCompressedPacket, decodePacket, encodePacket } from './packet';
 import { StateManager } from './states/StateManager';
 import { StateHandshake } from './states/StateHandshake';
 import { StateLogin } from './states/StateLogin';
 
 const host = 'localhost';
 const port = 25565;
+let compressionThreshold = 0;
 
 export const start = () => {
   const socket = net.connect(port, host);
@@ -30,12 +31,19 @@ export const start = () => {
 
           socket.write(packet);
         },
+        enableCompression: (threshold) => {
+          compressionThreshold = threshold;
+        }
       });
 
       socket.on('data', data => {
-        const packet = decodePacket(data);
-
-        stateManager.receive(packet);
+        if (compressionThreshold <= 0) {
+          const packet = decodePacket(data);
+          stateManager.receive(packet);
+        } else {
+          const packet = decodeCompressedPacket(compressionThreshold, data);
+          stateManager.receive(packet);
+        }
       });
     });
   });

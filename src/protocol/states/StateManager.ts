@@ -4,6 +4,7 @@ import { State } from './State';
 interface StateManagerCtor {
   states: State[];
   onSend: (id: number, data: Buffer) => void;
+  enableCompression: (threshold: number) => void;
 }
 
 export class StateManager {
@@ -19,6 +20,7 @@ export class StateManager {
       switchTo: id => {
         this.changeActiveState(id);
       },
+      enableCompression: ctor.enableCompression,
     }));
 
     this.changeActiveState(0);

@@ -9,7 +9,9 @@ const protocolVersionNumber = 758; // https://wiki.vg/Protocol#Handshaking
 export class StateHandshake extends State {
   public readonly id = 0;
 
-  public receive (packet: Packet): void {}
+  public receive (packet: Packet): void {
+    console.log('handshake', packet.id, packet.length);
+  }
 
   public onSwitchTo (): void {
     // (1) - status, (2) - login
