@@ -1,5 +1,5 @@
 import { Packet } from '../packet';
-import { State } from './State';
+import { State, StateId } from './State';
 
 interface StateManagerCtor {
   states: State[];
@@ -8,7 +8,7 @@ interface StateManagerCtor {
 }
 
 export class StateManager {
-  private activeStateId!: number;
+  private activeStateId!: StateId;
   private activeState!: State;
   private states: State[];
 
@@ -23,7 +23,7 @@ export class StateManager {
       enableCompression: ctor.enableCompression,
     }));
 
-    this.changeActiveState(0);
+    this.changeActiveState(StateId.Handshake);
   }
 
   public receive (packet: Packet): void {

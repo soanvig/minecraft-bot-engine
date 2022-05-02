@@ -1,7 +1,13 @@
 import { Packet } from '../packet';
 
+export enum StateId {
+  Handshake = 0,
+  Login = 2,
+  Play = 3,
+}
+
 export type StateSend = (id: number, data: Buffer) => void;
-export type StateSwitchTo = (stateId: number) => void;
+export type StateSwitchTo = (stateId: StateId) => void;
 export type StateEnableCompression = (threshold: number) => void;
 
 export interface StateInitParams {
@@ -15,7 +21,7 @@ export abstract class State {
   protected switchTo!: StateSwitchTo;
   protected enableCompression!: StateEnableCompression;
 
-  abstract id: number;
+  abstract id: StateId;
   abstract receive(packet: Packet): void;
   abstract onSwitchTo(): void;
 

@@ -1,11 +1,11 @@
 import { Packet } from '../packet';
 import { SmartBuffer } from '../SmartBuffer';
-import { State } from './State';
+import { State, StateId } from './State';
 
 const username = 'Bot';
 
 export class StateLogin extends State {
-  public readonly id = 2;
+  public readonly id = StateId.Login;
 
   public receive (packet: Packet): void {
     console.log('login', packet.id, packet.length);
@@ -26,7 +26,7 @@ export class StateLogin extends State {
 
       console.log('Login nickname', nickname);
 
-      this.switchTo(3);
+      this.switchTo(StateId.Play);
     }
   }
 
