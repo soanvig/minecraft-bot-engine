@@ -1,5 +1,5 @@
 import net from 'net';
-import { decodeCompressedPacket, decodePacket, encodePacket } from './packet';
+import { decodeCompressedPacket, decodePacket, encodeCompressedPacket, encodePacket } from './packet';
 import { StateManager } from './states/StateManager';
 import { StateHandshake } from './states/StateHandshake';
 import { StateLogin } from './states/StateLogin';
@@ -29,9 +29,13 @@ export const start = () => {
           new StatePlay(),
         ],
         onSend: (id, data) => {
-          const packet = encodePacket(id, data);
-
-          socket.write(packet);
+          if (compressionThreshold <= 0) {
+            const packet = encodePacket(id, data);
+            socket.write(packet);
+          } else {
+            const packet = encodeCompressedPacket(compressionThreshold, id, data);
+            socket.write(packet);
+          }
         },
         enableCompression: (threshold) => {
           compressionThreshold = threshold;

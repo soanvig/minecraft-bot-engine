@@ -1,5 +1,14 @@
 import { SmartBuffer } from './SmartBuffer';
-import { unzipSync } from 'zlib';
+import { inflateSync, unzipSync } from 'zlib';
+
+/**
+ * @TODO
+ * 1. Extract to more declarative approach
+ * 2. Use streams, not sync
+ * 3. Optimize code with "insert" when length of following fields needs to be determined beforehand
+ * (after https://github.com/JoshGlazebrook/smart-buffer/pull/47 is merged)
+ * 4. Use Unzip for compressing the packet (currently not implemented, because it relies on streams)
+ */
 
 export interface Packet {
   id: number;
@@ -7,7 +16,7 @@ export interface Packet {
   data: SmartBuffer;
 }
 
-export const encodePacket = (id: number, data: Buffer) => {
+export const encodePacket = (id: number, data: Buffer): Buffer => {
   const idField = new SmartBuffer();
   idField.writeVarInt(id);
 
@@ -63,4 +72,31 @@ export const decodeCompressedPacket = (compressionThreshold: number, packet: Buf
     length: dataLength,
     data: SmartBuffer.fromBuffer(data.readBuffer()),
   };
+};
+
+export const encodeCompressedPacket = (compressionThreshold: number, id: number, data: Buffer): Buffer => {
+  const packet = new SmartBuffer();
+  const idLength = new SmartBuffer().writeVarInt(id).length;
+
+  const dataToSend = new SmartBuffer();
+  dataToSend.writeVarInt(id);
+  dataToSend.writeBuffer(data);
+
+  if (idLength + data.length < compressionThreshold) {
+    packet.writeVarInt(dataToSend.length + 1); // 1 for dataLength encoded for 0
+    packet.writeVarInt(0);
+    packet.writeBuffer(dataToSend.toBuffer());
+  } else {
+    const compressedData = inflateSync(dataToSend.toBuffer());
+
+    const dataLength = dataToSend.length;
+    const dataLengthLength = new SmartBuffer().writeVarInt(dataLength).length;
+    const compressedPacketLength = dataLengthLength + compressedData.length;
+    
+    packet.writeVarInt(compressedPacketLength);
+    packet.writeVarInt(dataLength);
+    packet.writeBuffer(compressedData);
+  }
+
+  return packet.toBuffer();
 };
