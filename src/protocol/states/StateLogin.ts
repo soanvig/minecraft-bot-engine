@@ -1,4 +1,4 @@
-import { Packet } from '../packet';
+import { Packet } from '../packets/packet';
 import { SmartBuffer } from '../SmartBuffer';
 import { State, StateId } from './State';
 
@@ -8,8 +8,6 @@ export class StateLogin extends State {
   public readonly id = StateId.Login;
 
   public receive (packet: Packet): void {
-    console.log('login', packet.id, packet.length);
-
     if (packet.id === 3) {
       const maxPacketSize = packet.data.readVarInt();
 
@@ -31,15 +29,18 @@ export class StateLogin extends State {
   }
 
   public onSwitchTo (): void {
-    this.send(0, createLoginPacket());
+    this.send(createLoginPacket());
   }
 }
 
-const createLoginPacket = () => {
+const createLoginPacket = (): Packet => {
   const data = new SmartBuffer();
 
   data.writeVarInt(username.length);
   data.writeString(username, 'utf-8');
 
-  return data.toBuffer();
+  return {
+    id: 0,
+    data,
+  }
 };

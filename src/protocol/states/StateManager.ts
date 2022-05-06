@@ -1,33 +1,33 @@
-import { Packet } from '../packet';
+import { Subscription } from 'rxjs';
+import { Packet } from '../packets/packet';
+import { PacketManager } from '../packets/PacketManager';
 import { State, StateId } from './State';
 
 interface StateManagerCtor {
   states: State[];
-  onSend: (id: number, data: Buffer) => void;
-  enableCompression: (threshold: number) => void;
+  packetManager: PacketManager;
 }
 
 export class StateManager {
   private activeStateId!: StateId;
   private activeState!: State;
   private states: State[];
+  private packetSubscription: Subscription;
 
-  constructor (ctor: StateManagerCtor) {
-    this.states = ctor.states;
+  constructor ({ states, packetManager}: StateManagerCtor) {
+    this.states = states;
 
-    ctor.states.forEach(state => state.init({
-      send: ctor.onSend,
+    states.forEach(state => state.init({
+      send: p => packetManager.send(p),
       switchTo: id => {
         this.changeActiveState(id);
       },
-      enableCompression: ctor.enableCompression,
+      enableCompression: (t) => packetManager.setCompressionThreshold(t),
     }));
 
     this.changeActiveState(StateId.Handshake);
-  }
 
-  public receive (packet: Packet): void {
-    this.activeState.receive(packet);
+    this.packetSubscription = packetManager.packets.subscribe(p => this.activeState.receive(p));
   }
 
   private changeActiveState (id: number): void {

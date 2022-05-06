@@ -1,22 +1,20 @@
-import { SmartBuffer } from './SmartBuffer';
-import { inflateSync, unzipSync } from 'zlib';
+import { SmartBuffer } from '../SmartBuffer';
+import { deflate, inflate } from 'zlib';
+import { promisify } from 'util';
 
 /**
  * @TODO
- * 1. Extract to more declarative approach
- * 2. Use streams, not sync
+ * 1. Probably responsibilites of these function needs to be limited, especially managing smart buffers
  * 3. Optimize code with "insert" when length of following fields needs to be determined beforehand
  * (after https://github.com/JoshGlazebrook/smart-buffer/pull/47 is merged)
- * 4. Use Unzip for compressing the packet (currently not implemented, because it relies on streams)
  */
 
 export interface Packet {
   id: number;
-  length: number;
   data: SmartBuffer;
 }
 
-export const encodePacket = (id: number, data: Buffer): Buffer => {
+export const encodePacket = async ({ id, data }: Packet): Promise<Buffer> => {
   const idField = new SmartBuffer();
   idField.writeVarInt(id);
 
@@ -26,11 +24,11 @@ export const encodePacket = (id: number, data: Buffer): Buffer => {
   return Buffer.concat([
     lengthField.toBuffer(),
     idField.toBuffer(),
-    data,
+    data.toBuffer(),
   ]);
 };
 
-export const decodePacket = (packet: Buffer): Packet => {
+export const decodePacket = async (packet: Buffer): Promise<Packet> => {
   const smartBuffer = SmartBuffer.fromBuffer(packet);
 
   const length = smartBuffer.readVarInt();
@@ -39,12 +37,11 @@ export const decodePacket = (packet: Buffer): Packet => {
 
   return {
     id,
-    length,
     data: SmartBuffer.fromBuffer(data.readBuffer()),
   };
 };
 
-export const decodeCompressedPacket = (compressionThreshold: number, packet: Buffer): Packet => {
+export const decodeCompressedPacket = async (compressionThreshold: number, packet: Buffer): Promise<Packet> => {
   const smartBuffer = SmartBuffer.fromBuffer(packet);
 
   const packetLength = smartBuffer.readVarInt();
@@ -56,38 +53,37 @@ export const decodeCompressedPacket = (compressionThreshold: number, packet: Buf
 
     return {
       id: uncompressedId,
-      length: packetLength,
       data: SmartBuffer.fromBuffer(uncompressedData.readBuffer()),
     }
   }
 
   const compressedData = smartBuffer.readBuffer();
-  const decompressedData = SmartBuffer.fromBuffer(unzipSync(compressedData));
+  const unzippedData = await promisify(inflate)(compressedData);
+  const decompressedData = SmartBuffer.fromBuffer(unzippedData);
 
   const id = decompressedData.readVarInt();
   const data = decompressedData;
 
   return {
     id,
-    length: dataLength,
     data: SmartBuffer.fromBuffer(data.readBuffer()),
   };
 };
 
-export const encodeCompressedPacket = (compressionThreshold: number, id: number, data: Buffer): Buffer => {
+export const encodeCompressedPacket = async (compressionThreshold: number, { id, data }: Packet): Promise<Buffer> => {
   const packet = new SmartBuffer();
   const idLength = new SmartBuffer().writeVarInt(id).length;
 
   const dataToSend = new SmartBuffer();
   dataToSend.writeVarInt(id);
-  dataToSend.writeBuffer(data);
+  dataToSend.writeBuffer(data.toBuffer());
 
   if (idLength + data.length < compressionThreshold) {
     packet.writeVarInt(dataToSend.length + 1); // 1 for dataLength encoded for 0
     packet.writeVarInt(0);
     packet.writeBuffer(dataToSend.toBuffer());
   } else {
-    const compressedData = inflateSync(dataToSend.toBuffer());
+    const compressedData = await promisify(deflate)(dataToSend.toBuffer());
 
     const dataLength = dataToSend.length;
     const dataLengthLength = new SmartBuffer().writeVarInt(dataLength).length;

@@ -7,6 +7,7 @@
  "scripts": {
   "build": "yarn tsc",
   "start": "ts-node -T ./src/index.ts",
+  "start:sandbox": "ts-node -T ./src/sandbox.ts",
   "test": "ava"
  },
  "devDependencies": {
@@ -29,6 +30,8 @@
  },
  "dependencies": {
   "mineflayer": "4.2.0",
+  "rxjs": "^7.5.5",
+  "rxjs-stream": "^4.0.2",
   "smart-buffer": "^4.2.0"
  }
 }

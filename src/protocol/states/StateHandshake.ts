@@ -1,4 +1,4 @@
-import { Packet } from '../packet';
+import { Packet } from '../packets/packet';
 import { SmartBuffer } from '../SmartBuffer';
 import { State, StateId } from './State';
 
@@ -9,19 +9,17 @@ const protocolVersionNumber = 758; // https://wiki.vg/Protocol#Handshaking
 export class StateHandshake extends State {
   public readonly id = StateId.Handshake;
 
-  public receive (packet: Packet): void {
-    console.log('handshake', packet.id, packet.length);
-  }
+  public receive (packet: Packet): void {}
 
   public onSwitchTo (): void {
     const targetState = StateId.Login;
 
-    this.send(0, createHandshakePacket(targetState));
+    this.send(createHandshakePacket(targetState));
     this.switchTo(targetState);
   }
 }
 
-const createHandshakePacket = (targetState: number) => {
+const createHandshakePacket = (targetState: number): Packet => {
   const data = new SmartBuffer();
 
   data.writeVarInt(protocolVersionNumber);
@@ -30,5 +28,8 @@ const createHandshakePacket = (targetState: number) => {
   data.writeUInt16BE(port);
   data.writeVarInt(targetState);
 
-  return data.toBuffer();
+  return {
+    id: 0,
+    data,
+  };
 };

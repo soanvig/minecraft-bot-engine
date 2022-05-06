@@ -1,5 +1,5 @@
 import net from 'net';
-import { encodePacket } from './packet';
+import { encodePacket } from './packets/packet';
 import { SmartBuffer } from './SmartBuffer';
 import { publicEncrypt, randomBytes } from 'crypto';
 

@@ -1,4 +1,4 @@
-import { Packet } from '../packet';
+import { Packet } from '../packets/packet';
 
 export enum StateId {
   Handshake = 0,
@@ -6,7 +6,7 @@ export enum StateId {
   Play = 3,
 }
 
-export type StateSend = (id: number, data: Buffer) => void;
+export type StateSend = (packet: Packet) => void;
 export type StateSwitchTo = (stateId: StateId) => void;
 export type StateEnableCompression = (threshold: number) => void;
 
