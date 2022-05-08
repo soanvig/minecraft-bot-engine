@@ -1,37 +1,18 @@
 {
- "name": "typescript-backend-template",
+ "name": "minecraft-bot-engine",
  "version": "1.0.0",
- "main": "build/index.js",
  "repository": "git@github.com:soanvig/typescript-backend-template.git",
  "author": "Mateusz Koteja <soanvig@gmail.com>",
- "scripts": {
-  "build": "yarn tsc",
-  "start": "ts-node -T ./src/index.ts",
-  "start:sandbox": "ts-node -T ./src/sandbox.ts",
-  "test": "ava"
- },
  "devDependencies": {
   "@typescript-eslint/eslint-plugin": "^5.12.1",
   "@typescript-eslint/parser": "^5.12.1",
-  "ava": "^4.0.1",
   "eslint": "^8.9.0",
   "eslint-plugin-import-quotes": "^0.0.1",
   "eslint-rules": "soanvig/eslint-rules",
-  "ts-node": "^10.5.0",
   "typescript": "^4.5.5"
  },
- "ava": {
-  "extensions": [
-   "ts"
-  ],
-  "require": [
-   "ts-node/register"
-  ]
- },
- "dependencies": {
-  "rxjs": "^7.5.5",
-  "rxjs-stream": "^4.0.2",
-  "smart-buffer": "^4.2.0"
- },
- "packageManager": "yarn@3.2.0"
+ "packageManager": "yarn@3.2.0",
+ "workspaces": [
+  "packages/*"
+ ]
 }
