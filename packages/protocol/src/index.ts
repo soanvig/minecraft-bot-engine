@@ -1,5 +1,5 @@
 import { Packet } from './packets/packet';
-import { start } from './protocol';
+import { protocol } from './protocol';
 import { StatePlay } from './states/StatePlay';
 
 class Play extends StatePlay {
@@ -10,4 +10,9 @@ class Play extends StatePlay {
   public onSwitchTo (): void {}
 }
 
-start(new Play());
+protocol({
+  host: 'localhost',
+  port: 25565,
+  username: 'Bot',
+  playHandler: new Play(),
+});

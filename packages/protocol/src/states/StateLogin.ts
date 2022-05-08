@@ -2,10 +2,18 @@ import { Packet } from '../packets/packet';
 import { SmartBuffer } from '../SmartBuffer';
 import { State, StateId } from './State';
 
-const username = 'Bot';
+interface LoginConfig {
+  username: string;
+}
 
 export class StateLogin extends State {
   public readonly id = StateId.Login;
+
+  constructor (
+    private config: LoginConfig,
+  ) {
+    super();
+  }
 
   public receive (packet: Packet): void {
     if (packet.id === 3) {
@@ -29,11 +37,11 @@ export class StateLogin extends State {
   }
 
   public onSwitchTo (): void {
-    this.send(createLoginPacket());
+    this.send(createLoginPacket(this.config.username));
   }
 }
 
-const createLoginPacket = (): Packet => {
+const createLoginPacket = (username: string): Packet => {
   const data = new SmartBuffer();
 
   data.writeVarInt(username.length);
@@ -42,5 +50,5 @@ const createLoginPacket = (): Packet => {
   return {
     id: 0,
     data,
-  }
+  };
 };

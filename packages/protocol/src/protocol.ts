@@ -5,11 +5,15 @@ import { StateLogin } from './states/StateLogin';
 import { StatePlay } from './states/StatePlay';
 import { PacketManager } from './packets/PacketManager';
 
-const host = 'localhost';
-const port = 25565;
+export interface ProtocolConfig {
+  host: string;
+  port: number;
+  playHandler: StatePlay;
+  username: string;
+}
 
-export const start = (statePlay: StatePlay): Promise<StateManager> => new Promise(resolve => {
-  const socket = net.connect(port, host);
+export const protocol = (config: ProtocolConfig): Promise<StateManager> => new Promise(resolve => {
+  const socket = net.connect(config.port, config.host);
 
   socket.on('connect', () => {
     console.log('Connected');
@@ -18,8 +22,8 @@ export const start = (statePlay: StatePlay): Promise<StateManager> => new Promis
     const stateManager = new StateManager({
       states: [
         new StateHandshake(),
-        new StateLogin(),
-        statePlay,
+        new StateLogin({ username: config.username }),
+        config.playHandler,
       ],
       packetManager,
     });
