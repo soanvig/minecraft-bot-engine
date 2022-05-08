@@ -29,7 +29,6 @@
   ]
  },
  "dependencies": {
-  "mineflayer": "4.2.0",
   "rxjs": "^7.5.5",
   "rxjs-stream": "^4.0.2",
   "smart-buffer": "^4.2.0"
