@@ -54,7 +54,7 @@ export const decodeCompressedPacket = async (compressionThreshold: number, packe
     return {
       id: uncompressedId,
       data: SmartBuffer.fromBuffer(uncompressedData.readBuffer()),
-    }
+    };
   }
 
   const compressedData = smartBuffer.readBuffer();
@@ -88,7 +88,7 @@ export const encodeCompressedPacket = async (compressionThreshold: number, { id,
     const dataLength = dataToSend.length;
     const dataLengthLength = new SmartBuffer().writeVarInt(dataLength).length;
     const compressedPacketLength = dataLengthLength + compressedData.length;
-    
+
     packet.writeVarInt(compressedPacketLength);
     packet.writeVarInt(dataLength);
     packet.writeBuffer(compressedData);

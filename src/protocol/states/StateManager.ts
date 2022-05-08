@@ -1,4 +1,4 @@
-import { Subscription } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { Packet } from '../packets/packet';
 import { PacketManager } from '../packets/PacketManager';
 import { State, StateId } from './State';
@@ -9,25 +9,28 @@ interface StateManagerCtor {
 }
 
 export class StateManager {
-  private activeStateId!: StateId;
   private activeState!: State;
   private states: State[];
   private packetSubscription: Subscription;
+  private packetManager: PacketManager;
 
   constructor ({ states, packetManager}: StateManagerCtor) {
+    this.packetManager = packetManager;
     this.states = states;
 
     states.forEach(state => state.init({
-      send: p => packetManager.send(p),
+      send: p => this.packetManager.send(p),
       switchTo: id => {
         this.changeActiveState(id);
       },
-      enableCompression: (t) => packetManager.setCompressionThreshold(t),
+      enableCompression: t => this.packetManager.setCompressionThreshold(t),
     }));
 
     this.changeActiveState(StateId.Handshake);
 
-    this.packetSubscription = packetManager.packets.subscribe(p => this.activeState.receive(p));
+    this.packetSubscription = this.packetManager.packets.subscribe(p => {
+      this.activeState.receive(p);
+    });
   }
 
   private changeActiveState (id: number): void {
@@ -37,7 +40,6 @@ export class StateManager {
       throw new Error(`Unknown desired state: ${id}`);
     }
 
-    this.activeStateId = id;
     this.activeState = state;
 
     state.onSwitchTo();

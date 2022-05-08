@@ -8,7 +8,7 @@ import { PacketManager } from './packets/PacketManager';
 const host = 'localhost';
 const port = 25565;
 
-export const start = () => {
+export const start = (statePlay: StatePlay): Promise<StateManager> => new Promise(resolve => {
   const socket = net.connect(port, host);
 
   socket.on('connect', () => {
@@ -19,9 +19,11 @@ export const start = () => {
       states: [
         new StateHandshake(),
         new StateLogin(),
-        new StatePlay(),
+        statePlay,
       ],
       packetManager,
     });
+
+    resolve(stateManager);
   });
-};
+});
