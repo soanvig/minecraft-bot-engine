@@ -1,5 +1,4 @@
-import { Observable, Subject, Subscription } from 'rxjs';
-import { Packet } from '../packets/packet';
+import { Subscription } from 'rxjs';
 import { PacketManager } from '../packets/PacketManager';
 import { State, StateId } from './State';
 
@@ -18,6 +17,10 @@ export class StateManager {
     this.packetManager = packetManager;
     this.states = states;
 
+    this.packetSubscription = this.packetManager.packets.subscribe(p => {
+      this.activeState.receive(p);
+    });
+
     states.forEach(state => state.init({
       send: p => this.packetManager.send(p),
       switchTo: id => {
@@ -27,18 +30,16 @@ export class StateManager {
     }));
 
     this.changeActiveState(StateId.Handshake);
-
-    this.packetSubscription = this.packetManager.packets.subscribe(p => {
-      this.activeState.receive(p);
-    });
   }
 
-  private changeActiveState (id: number): void {
+  private changeActiveState (id: StateId): void {
     const state = this.states.find(s => s.id === id);
 
     if (!state) {
       throw new Error(`Unknown desired state: ${id}`);
     }
+
+    console.log(`Switched to ${StateId[id]}`);
 
     this.activeState = state;
 

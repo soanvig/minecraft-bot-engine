@@ -1,7 +1,7 @@
 import { Socket } from 'net';
-import { pipe, Observable, OperatorFunction, Subject, Subscription, concatMap, ObservableInput, tap } from 'rxjs';
+import { pipe, Observable, OperatorFunction, Subject, Subscription, concatMap } from 'rxjs';
 import { streamToRx } from 'rxjs-stream';
-import { decodeCompressedPacket, decodePacket, encodeCompressedPacket, encodePacket, Packet } from './packet';
+import { decodeCompressedPacket, decodePacket, Decoder, encodeCompressedPacket, encodePacket, Encoder, Packet } from './packet';
 
 /**
  * @TODO
@@ -12,8 +12,13 @@ export class PacketManager {
   private writer: Subject<Packet> = new Subject();
   private writerSubscription: Subscription;
   private compressionThreshold = -1;
+  private decoder: Decoder;
+  private encoder: Encoder;
 
   constructor (socket: Socket) {
+    this.decoder = decodePacket;
+    this.encoder = encodePacket;
+
     this.socketObservable = streamToRx(socket).pipe(
       this.makeIncomingPacketParser(),
     );
@@ -33,49 +38,25 @@ export class PacketManager {
 
   public setCompressionThreshold (threshold: number) {
     this.compressionThreshold = threshold;
-  }
 
-  private isCompressionEnabled () {
-    return this.compressionThreshold >= 0;
+    if (threshold >= 0) {
+      this.encoder = encodeCompressedPacket(threshold);
+      this.decoder = decodeCompressedPacket(threshold);
+    } else {
+      this.encoder = encodePacket;
+      this.decoder = decodePacket;
+    }
   }
 
   private makeIncomingPacketParser (): OperatorFunction<Buffer, Packet> {
-    const conditionalDecoder = iifProject(
-      () => this.isCompressionEnabled(),
-      p => decodeCompressedPacket(this.compressionThreshold, p),
-      decodePacket,
-    );
-
     return pipe(
-      concatMap(conditionalDecoder),
+      concatMap(p => this.decoder(p)),
     );
   }
 
   private makeOutcomingPacketParser (): OperatorFunction<Packet, Buffer> {
-    const conditionalEncoder = iifProject(
-      () => this.isCompressionEnabled(),
-      p => encodeCompressedPacket(this.compressionThreshold, p),
-      encodePacket,
-    );
-
     return pipe(
-      concatMap(conditionalEncoder),
+      concatMap(p => this.encoder(p)),
     );
   }
 }
-
-const iifProject = <V, T, F>(
-  cond: (v: V) => boolean,
-  trueResult: (v: V) => ObservableInput<T>,
-  falseResult: (v: V) => ObservableInput<F>,
-): (v: V) => ObservableInput<T> | ObservableInput<F> => {
-  return value => {
-    if (cond(value)) {
-      return trueResult(value);
-    } else {
-      return falseResult(value);
-    }
-  };
-};
-
-const defer = <T>(f: () => T): T => f();

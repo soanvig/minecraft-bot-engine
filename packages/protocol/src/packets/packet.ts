@@ -14,7 +14,10 @@ export interface Packet {
   data: SmartBuffer;
 }
 
-export const encodePacket = async ({ id, data }: Packet): Promise<Buffer> => {
+export type Decoder = (buffer: Buffer) => Promise<Packet>;
+export type Encoder = (packet: Packet) => Promise<Buffer>;
+
+export const encodePacket: Encoder = async ({ id, data }) => {
   const idField = new SmartBuffer();
   idField.writeVarInt(id);
 
@@ -28,7 +31,7 @@ export const encodePacket = async ({ id, data }: Packet): Promise<Buffer> => {
   ]);
 };
 
-export const decodePacket = async (packet: Buffer): Promise<Packet> => {
+export const decodePacket: Decoder = async (packet) => {
   const smartBuffer = SmartBuffer.fromBuffer(packet);
 
   const length = smartBuffer.readVarInt();
@@ -41,7 +44,7 @@ export const decodePacket = async (packet: Buffer): Promise<Packet> => {
   };
 };
 
-export const decodeCompressedPacket = async (compressionThreshold: number, packet: Buffer): Promise<Packet> => {
+export const decodeCompressedPacket = (compressionThreshold: number): Decoder => async (packet) => {
   const smartBuffer = SmartBuffer.fromBuffer(packet);
 
   const packetLength = smartBuffer.readVarInt();
@@ -70,7 +73,7 @@ export const decodeCompressedPacket = async (compressionThreshold: number, packe
   };
 };
 
-export const encodeCompressedPacket = async (compressionThreshold: number, { id, data }: Packet): Promise<Buffer> => {
+export const encodeCompressedPacket = (compressionThreshold: number): Encoder => async ({ id, data }) => {
   const packet = new SmartBuffer();
   const idLength = new SmartBuffer().writeVarInt(id).length;
 
