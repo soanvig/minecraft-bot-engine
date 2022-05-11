@@ -339,6 +339,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bot@workspace:packages/bot":
+  version: 0.0.0-use.local
+  resolution: "bot@workspace:packages/bot"
+  dependencies:
+    "@types/node": ^17.0.31
+    protocol: "workspace:^"
+    rxjs: ^7.5.5
+    smart-buffer: ^4.2.0
+    ts-node: ^10.5.0
+    typescript: ^4.5.5
+  languageName: unknown
+  linkType: soft
+
 "brace-expansion@npm:^1.1.7":
   version: 1.1.11
   resolution: "brace-expansion@npm:1.1.11"
@@ -1038,7 +1051,7 @@ eslint-rules@soanvig/eslint-rules:
   languageName: node
   linkType: hard
 
-"protocol@workspace:packages/protocol":
+"protocol@workspace:^, protocol@workspace:packages/protocol":
   version: 0.0.0-use.local
   resolution: "protocol@workspace:packages/protocol"
   dependencies:
