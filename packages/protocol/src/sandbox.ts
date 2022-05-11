@@ -1,30 +1,18 @@
-import { Duplex } from 'stream';
-import { streamToRx } from 'rxjs-stream';
-import { map, Subject, tap } from 'rxjs';
+import { Packet } from './packets/packet';
+import { protocol } from './protocol';
+import { StatePlay } from './states/StatePlay';
 
-class Socket extends Duplex {
-  public _write(data: any, encoding: BufferEncoding, callback: (error?: Error | null) => void): void {
-    console.log('[Socket] received', data, typeof data);
+class Play extends StatePlay {
+  public receive (packet: Packet): void {
+    console.log('Play packet', `0x${packet.id.toString(16).padStart(2, '0')}`);
   }
-  
-  public _read(size: number): void {
-    const data = `{ "key": true }`;
-    
-    console.log('[Socket] send', data, typeof data);
-    
-    this.push(data);
-    this.push(null);
-  }
+
+  public onSwitchTo (): void {}
 }
 
-const socket = new Socket({ objectMode: true });
-const socketObservable = streamToRx<string>(socket);
-const socketWritable = new Subject();
-
-socketWritable.subscribe(value => socket.write(value));
-
-socketObservable.pipe(
-  map(value => JSON.parse(value)),
-  tap(value => console.log('[Tap] received', value, typeof value)),
-  map(value => JSON.stringify(value))
-).subscribe(socketWritable);
+protocol({
+  host: 'localhost',
+  port: 25565,
+  username: 'Bot',
+  playHandler: new Play(),
+});

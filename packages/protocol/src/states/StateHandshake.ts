@@ -30,6 +30,6 @@ const createHandshakePacket = (targetState: number): Packet => {
 
   return {
     id: 0,
-    data,
+    data: data.toBuffer(),
   };
 };

@@ -2,12 +2,12 @@
   "name": "protocol",
   "version": "1.0.0",
   "main": "build/index.js",
+  "types": "build/index.d.ts",
   "repository": "git@github.com:soanvig/minecrat-bot-engine.git",
   "author": "Mateusz Koteja <soanvig@gmail.com>",
   "scripts": {
     "build": "yarn tsc",
-    "start": "ts-node -T ./src/index.ts",
-    "start:sandbox": "ts-node -T ./src/sandbox.ts"
+    "start": "ts-node -T ./src/sandbox.ts"
   },
   "devDependencies": {
     "@types/node": "^17.0.31",

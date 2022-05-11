@@ -4,14 +4,13 @@ import { promisify } from 'util';
 
 /**
  * @TODO
- * 1. Probably responsibilites of these function needs to be limited, especially managing smart buffers
  * 3. Optimize code with "insert" when length of following fields needs to be determined beforehand
  * (after https://github.com/JoshGlazebrook/smart-buffer/pull/47 is merged)
  */
 
 export interface Packet {
   id: number;
-  data: SmartBuffer;
+  data: Buffer;
 }
 
 export type Decoder = (buffer: Buffer) => Promise<Packet>;
@@ -27,7 +26,7 @@ export const encodePacket: Encoder = async ({ id, data }) => {
   return Buffer.concat([
     lengthField.toBuffer(),
     idField.toBuffer(),
-    data.toBuffer(),
+    data,
   ]);
 };
 
@@ -40,7 +39,7 @@ export const decodePacket: Decoder = async (packet) => {
 
   return {
     id,
-    data: SmartBuffer.fromBuffer(data.readBuffer()),
+    data: data.readBuffer(),
   };
 };
 
@@ -56,7 +55,7 @@ export const decodeCompressedPacket = (compressionThreshold: number): Decoder =>
 
     return {
       id: uncompressedId,
-      data: SmartBuffer.fromBuffer(uncompressedData.readBuffer()),
+      data: uncompressedData.readBuffer(),
     };
   }
 
@@ -69,7 +68,7 @@ export const decodeCompressedPacket = (compressionThreshold: number): Decoder =>
 
   return {
     id,
-    data: SmartBuffer.fromBuffer(data.readBuffer()),
+    data: data.readBuffer(),
   };
 };
 
@@ -79,7 +78,7 @@ export const encodeCompressedPacket = (compressionThreshold: number): Encoder =>
 
   const dataToSend = new SmartBuffer();
   dataToSend.writeVarInt(id);
-  dataToSend.writeBuffer(data.toBuffer());
+  dataToSend.writeBuffer(data);
 
   if (idLength + data.length < compressionThreshold) {
     packet.writeVarInt(dataToSend.length + 1); // 1 for dataLength encoded for 0
