@@ -21,8 +21,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:."\
       },\
       {\
-        "name": "bot",\
-        "reference": "workspace:packages/bot"\
+        "name": "client",\
+        "reference": "workspace:packages/client"\
       },\
       {\
         "name": "protocol",\
@@ -32,7 +32,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
     "enableTopLevelFallback": true,\
     "ignorePatternData": "(^(?:\\\\.yarn\\\\/sdks(?:\\\\/(?!\\\\.{1,2}(?:\\\\/|$))(?:(?:(?!(?:^|\\\\/)\\\\.{1,2}(?:\\\\/|$)).)*?)|$))$)",\
     "fallbackExclusionList": [\
-      ["bot", ["workspace:packages/bot"]],\
+      ["client", ["workspace:packages/client"]],\
       ["minecraft-bot-engine", ["workspace:."]],\
       ["protocol", ["workspace:packages/protocol"]]\
     ],\
@@ -527,21 +527,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
-      ["bot", [\
-        ["workspace:packages/bot", {\
-          "packageLocation": "./packages/bot/",\
-          "packageDependencies": [\
-            ["bot", "workspace:packages/bot"],\
-            ["@types/node", "npm:17.0.31"],\
-            ["protocol", "workspace:packages/protocol"],\
-            ["rxjs", "npm:7.5.5"],\
-            ["smart-buffer", "npm:4.2.0"],\
-            ["ts-node", "virtual:9fe0e66f294764ea01de281adef3355862b5c3d0e622435325fc5dee7179e98aa0f48da493a8de1564e4a4e1d45f38c93e607c518eaa867362d74a22d594f28f#npm:10.5.0"],\
-            ["typescript", "patch:typescript@npm%3A4.5.5#~builtin<compat/typescript>::version=4.5.5&hash=bda367"]\
-          ],\
-          "linkType": "SOFT"\
-        }]\
-      ]],\
       ["brace-expansion", [\
         ["npm:1.1.11", {\
           "packageLocation": "./.yarn/cache/brace-expansion-npm-1.1.11-fb95eb05ad-faf34a7bb0.zip/node_modules/brace-expansion/",\
@@ -581,6 +566,21 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["supports-color", "npm:7.2.0"]\
           ],\
           "linkType": "HARD"\
+        }]\
+      ]],\
+      ["client", [\
+        ["workspace:packages/client", {\
+          "packageLocation": "./packages/client/",\
+          "packageDependencies": [\
+            ["client", "workspace:packages/client"],\
+            ["@types/node", "npm:17.0.31"],\
+            ["protocol", "workspace:packages/protocol"],\
+            ["rxjs", "npm:7.5.5"],\
+            ["smart-buffer", "npm:4.2.0"],\
+            ["ts-node", "virtual:9fe0e66f294764ea01de281adef3355862b5c3d0e622435325fc5dee7179e98aa0f48da493a8de1564e4a4e1d45f38c93e607c518eaa867362d74a22d594f28f#npm:10.5.0"],\
+            ["typescript", "patch:typescript@npm%3A4.5.5#~builtin<compat/typescript>::version=4.5.5&hash=bda367"]\
+          ],\
+          "linkType": "SOFT"\
         }]\
       ]],\
       ["color-convert", [\

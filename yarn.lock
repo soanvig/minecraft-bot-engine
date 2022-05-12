@@ -339,19 +339,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bot@workspace:packages/bot":
-  version: 0.0.0-use.local
-  resolution: "bot@workspace:packages/bot"
-  dependencies:
-    "@types/node": ^17.0.31
-    protocol: "workspace:^"
-    rxjs: ^7.5.5
-    smart-buffer: ^4.2.0
-    ts-node: ^10.5.0
-    typescript: ^4.5.5
-  languageName: unknown
-  linkType: soft
-
 "brace-expansion@npm:^1.1.7":
   version: 1.1.11
   resolution: "brace-expansion@npm:1.1.11"
@@ -387,6 +374,19 @@ __metadata:
   checksum: fe75c9d5c76a7a98d45495b91b2172fa3b7a09e0cc9370e5c8feb1c567b85c4288e2b3fded7cfdd7359ac28d6b3844feb8b82b8686842e93d23c827c417e83fc
   languageName: node
   linkType: hard
+
+"client@workspace:packages/client":
+  version: 0.0.0-use.local
+  resolution: "client@workspace:packages/client"
+  dependencies:
+    "@types/node": ^17.0.31
+    protocol: "workspace:^"
+    rxjs: ^7.5.5
+    smart-buffer: ^4.2.0
+    ts-node: ^10.5.0
+    typescript: ^4.5.5
+  languageName: unknown
+  linkType: soft
 
 "color-convert@npm:^2.0.1":
   version: 2.0.1
