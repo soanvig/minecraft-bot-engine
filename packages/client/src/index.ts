@@ -1,29 +1,50 @@
-import { Packet, StatePlay, protocol, parsePacket, parseDouble, parseFloat, parseBuffer, parseVarInt, parseBoolean } from 'protocol';
+import { Packet, StatePlay, protocol } from 'protocol';
+import { PlayerPositionUpdatedEvent } from './events/PlayerPositionUpdated.event';
+import { EventCtor, IEvent } from './events/types';
 
-class Play extends StatePlay {
+const packetToEvent: Record<number, EventCtor> = {
+  0x38: PlayerPositionUpdatedEvent,
+}
+
+class Client extends StatePlay {
+  private eventHandlers: Map<EventCtor, ((event: IEvent) => void)[]> = new Map();
+
   public receive (packet: Packet): void {
-    if (packet.id === 0x38) {
-      console.log(parsePacket(packet, {
-        x: parseDouble(),
-        y: parseDouble(),
-        z: parseDouble(),
-        yaw: parseFloat(),
-        pitch: parseFloat(),
-        flags: parseBuffer(1),
-        teleportId: parseVarInt(),
-        shouldDismountVehicle: parseBoolean(),
-      }));
+    if (packet.id in packetToEvent) {
+      const eventCtor = packetToEvent[packet.id];
+
+      this.publishEvent(eventCtor, new eventCtor(packet));
     }
 
-    console.log(packet.id);
+    console.log(packet.id.toString(16));
   }
 
   public onSwitchTo (): void {}
+
+  public addListener<T extends EventCtor>(event: T, handler: (event: InstanceType<T>) => void) {
+    const handlers = this.eventHandlers.get(event) ?? [];
+
+    handlers.push(handler as any);
+
+    this.eventHandlers.set(event, handlers);
+  }
+
+  public removeListener<T extends EventCtor>(event: T, handler: (event: InstanceType<T>) => void) {
+    const handlers = this.eventHandlers.get(event) ?? [];
+
+    this.eventHandlers.set(event, handlers.filter(h => h !== handler));
+  }
+
+  private publishEvent(eventCtor: EventCtor, event: IEvent) {
+    const handlers = this.eventHandlers.get(eventCtor) ?? [];
+
+    handlers.forEach(handler => handler(event));
+  }
 }
 
 protocol({
   host: 'localhost',
   port: 25565,
   username: 'Bot2',
-  playHandler: new Play(),
+  playHandler: new Client(),
 });

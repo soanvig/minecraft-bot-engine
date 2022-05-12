@@ -24,6 +24,11 @@ export const parseString = () => (b: SmartBuffer) => {
 
   return b.readString(length, 'utf-8');
 };
+export const parseByteArray = () => (b: SmartBuffer) => {
+  const length = b.readVarInt();
+
+  return b.readBuffer(length);
+};
 export const parseBuffer = (length: number) => (b: SmartBuffer) => b.readBuffer(length);
 export const parseFloat = () => (b: SmartBuffer) => b.readFloatBE();
 export const parseDouble = () => (b: SmartBuffer) => b.readDoubleBE();
