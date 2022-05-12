@@ -1,6 +1,6 @@
 module.exports = {
   extends: [
-    './node_modules/eslint-rules/index.js',
+    'soanvig/eslint-rules',
   ],
   rules: {
     'no-bitwise': 'off',
