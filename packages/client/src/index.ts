@@ -16,6 +16,10 @@ class Client extends StatePlay {
       this.publishEvent(eventCtor, new eventCtor(packet));
     }
 
+    if (packet.id === 0x22) {
+      console.log(packet.data.slice(8, 10));
+    }
+
     console.log(packet.id.toString(16));
   }
 
