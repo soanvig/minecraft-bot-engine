@@ -16,9 +16,9 @@ export class StateLogin extends State {
     super();
   }
 
-  public receive (packet: Packet): void {
+  public async receive (packet: Packet): Promise<void> {
     if (packet.id === 3) {
-      const { maxPacketSize } = parsePacket(packet, {
+      const { maxPacketSize } = await parsePacket(packet, {
         maxPacketSize: parseVarInt(),
       })
 
@@ -26,7 +26,7 @@ export class StateLogin extends State {
     }
 
     if (packet.id === 2) {
-      const result = parsePacket(packet, {
+      const result = await parsePacket(packet, {
         // md5(OfflinePlayer:Nickname)
         uuid: parseBuffer(16),
         nickname: parseString(),
@@ -39,7 +39,7 @@ export class StateLogin extends State {
     }
   }
 
-  public onSwitchTo (): void {
+  public async onSwitchTo (): Promise<void> {
     this.send(createLoginPacket(this.config.username));
   }
 }

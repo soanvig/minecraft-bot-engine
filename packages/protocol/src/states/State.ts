@@ -22,8 +22,8 @@ export abstract class State {
   protected enableCompression!: StateEnableCompression;
 
   abstract id: StateId;
-  abstract receive(packet: Packet): void;
-  abstract onSwitchTo(): void;
+  abstract receive(packet: Packet): Promise<void>;
+  abstract onSwitchTo(): Promise<void>;
 
   public init (params: StateInitParams): void {
     this.send = params.send;

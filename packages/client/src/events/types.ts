@@ -4,4 +4,4 @@ export interface IEvent {
   payload: any;
 }
 
-export type EventCtor = new (packet: Packet) => IEvent;
+export type EventCtor<T extends IEvent> = { fromPacket: (packet: Packet) => Promise<T> };

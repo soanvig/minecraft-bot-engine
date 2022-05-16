@@ -35,3 +35,4 @@ export const parseFloat = () => (b: SmartBuffer) => b.readFloatBE();
 export const parseDouble = () => (b: SmartBuffer) => b.readDoubleBE();
 export const parseBoolean = () => (b: SmartBuffer) => Boolean(b.readBuffer(1)[0]);
 export const parseNBT = () => (b: SmartBuffer) => decodeNBT(b);
+export const parseInt = () => (b: SmartBuffer) => b.readInt32BE();

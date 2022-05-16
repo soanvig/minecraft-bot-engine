@@ -13,10 +13,10 @@ interface Payload {
 }
 
 export class PlayerPositionUpdatedEvent implements IEvent {
-  public readonly payload: Payload;
+  private constructor (public readonly payload: Payload) {}
 
-  constructor (packet: Packet) {
-    this.payload = parsePacket(packet, {
+  public static async fromPacket(packet: Packet) {
+    return new PlayerPositionUpdatedEvent(await parsePacket(packet, {
       x: parseDouble(),
       y: parseDouble(),
       z: parseDouble(),
@@ -25,6 +25,6 @@ export class PlayerPositionUpdatedEvent implements IEvent {
       flags: parseBuffer(1),
       teleportId: parseVarInt(),
       shouldDismountVehicle: parseBoolean(),
-    })
+    }));
   }
 }

@@ -1,4 +1,4 @@
-import { Subscription } from 'rxjs';
+import { mergeMap, Subscription } from 'rxjs';
 import { PacketManager } from '../packets/PacketManager';
 import { State, StateId } from './State';
 
@@ -17,9 +17,9 @@ export class StateManager {
     this.packetManager = packetManager;
     this.states = states;
 
-    this.packetSubscription = this.packetManager.packets.subscribe(p => {
-      this.activeState.receive(p);
-    });
+    this.packetSubscription = this.packetManager.packets.pipe(
+      mergeMap((p) => this.activeState.receive(p))
+    ).subscribe();
 
     states.forEach(state => state.init({
       send: p => this.packetManager.send(p),
@@ -43,6 +43,7 @@ export class StateManager {
 
     this.activeState = state;
 
+    /** @TODO handle promise */
     state.onSwitchTo();
   }
 }

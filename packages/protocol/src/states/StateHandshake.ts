@@ -9,9 +9,9 @@ const protocolVersionNumber = 758; // https://wiki.vg/Protocol#Handshaking
 export class StateHandshake extends State {
   public readonly id = StateId.Handshake;
 
-  public receive (packet: Packet): void {}
+  public async receive (packet: Packet): Promise<void> {}
 
-  public onSwitchTo (): void {
+  public async onSwitchTo (): Promise<void> {
     const targetState = StateId.Login;
 
     this.send(createHandshakePacket(targetState));
