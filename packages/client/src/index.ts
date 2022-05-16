@@ -29,7 +29,11 @@ class Client extends StatePlay {
     this.eventHandlers.set(event, handlers);
   }
 
-  public removeListener<T extends EventCtor>(event: T, handler: (event: InstanceType<T>) => void) {}
+  public removeListener<T extends EventCtor>(event: T, handler: (event: InstanceType<T>) => void) {
+    const handlers = this.eventHandlers.get(event) ?? [];
+
+    this.eventHandlers.set(event, handlers.filter(h => h !== handler));
+  }
 
   private publishEvent(eventCtor: EventCtor, event: IEvent) {
     const handlers = this.eventHandlers.get(eventCtor) ?? [];

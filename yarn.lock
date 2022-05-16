@@ -984,6 +984,17 @@ eslint-rules@soanvig/eslint-rules:
   languageName: node
   linkType: hard
 
+"nbt@workspace:, nbt@workspace:packages/nbt":
+  version: 0.0.0-use.local
+  resolution: "nbt@workspace:packages/nbt"
+  dependencies:
+    "@types/node": ^17.0.31
+    smart-buffer: ^4.2.0
+    ts-node: ^10.5.0
+    typescript: ^4.5.5
+  languageName: unknown
+  linkType: soft
+
 "once@npm:^1.3.0":
   version: 1.4.0
   resolution: "once@npm:1.4.0"
@@ -1056,6 +1067,7 @@ eslint-rules@soanvig/eslint-rules:
   resolution: "protocol@workspace:packages/protocol"
   dependencies:
     "@types/node": ^17.0.31
+    nbt: "workspace:"
     rxjs: ^7.5.5
     rxjs-stream: ^4.0.2
     smart-buffer: ^4.2.0

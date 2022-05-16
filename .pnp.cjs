@@ -25,6 +25,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:packages/client"\
       },\
       {\
+        "name": "nbt",\
+        "reference": "workspace:packages/nbt"\
+      },\
+      {\
         "name": "protocol",\
         "reference": "workspace:packages/protocol"\
       }\
@@ -34,6 +38,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
     "fallbackExclusionList": [\
       ["client", ["workspace:packages/client"]],\
       ["minecraft-bot-engine", ["workspace:."]],\
+      ["nbt", ["workspace:packages/nbt"]],\
       ["protocol", ["workspace:packages/protocol"]]\
     ],\
     "fallbackPool": [\
@@ -577,7 +582,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["protocol", "workspace:packages/protocol"],\
             ["rxjs", "npm:7.5.5"],\
             ["smart-buffer", "npm:4.2.0"],\
-            ["ts-node", "virtual:9fe0e66f294764ea01de281adef3355862b5c3d0e622435325fc5dee7179e98aa0f48da493a8de1564e4a4e1d45f38c93e607c518eaa867362d74a22d594f28f#npm:10.5.0"],\
+            ["ts-node", "virtual:b488ce5303f24f7080646d4d67eb5b458e52968e4971d80a08d06a23e9d77fde78a18d1810ee85e7c38bd08e109760a7bdeaa6aa7ab2c5bcd1aad91b38a6cf27#npm:10.5.0"],\
             ["typescript", "patch:typescript@npm%3A4.5.5#~builtin<compat/typescript>::version=4.5.5&hash=bda367"]\
           ],\
           "linkType": "SOFT"\
@@ -1305,6 +1310,19 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["nbt", [\
+        ["workspace:packages/nbt", {\
+          "packageLocation": "./packages/nbt/",\
+          "packageDependencies": [\
+            ["nbt", "workspace:packages/nbt"],\
+            ["@types/node", "npm:17.0.31"],\
+            ["smart-buffer", "npm:4.2.0"],\
+            ["ts-node", "virtual:b488ce5303f24f7080646d4d67eb5b458e52968e4971d80a08d06a23e9d77fde78a18d1810ee85e7c38bd08e109760a7bdeaa6aa7ab2c5bcd1aad91b38a6cf27#npm:10.5.0"],\
+            ["typescript", "patch:typescript@npm%3A4.5.5#~builtin<compat/typescript>::version=4.5.5&hash=bda367"]\
+          ],\
+          "linkType": "SOFT"\
+        }]\
+      ]],\
       ["once", [\
         ["npm:1.4.0", {\
           "packageLocation": "./.yarn/cache/once-npm-1.4.0-ccf03ef07a-cd0a885013.zip/node_modules/once/",\
@@ -1391,10 +1409,11 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["protocol", "workspace:packages/protocol"],\
             ["@types/node", "npm:17.0.31"],\
+            ["nbt", "workspace:packages/nbt"],\
             ["rxjs", "npm:7.5.5"],\
             ["rxjs-stream", "virtual:9fe0e66f294764ea01de281adef3355862b5c3d0e622435325fc5dee7179e98aa0f48da493a8de1564e4a4e1d45f38c93e607c518eaa867362d74a22d594f28f#npm:4.0.2"],\
             ["smart-buffer", "npm:4.2.0"],\
-            ["ts-node", "virtual:9fe0e66f294764ea01de281adef3355862b5c3d0e622435325fc5dee7179e98aa0f48da493a8de1564e4a4e1d45f38c93e607c518eaa867362d74a22d594f28f#npm:10.5.0"],\
+            ["ts-node", "virtual:b488ce5303f24f7080646d4d67eb5b458e52968e4971d80a08d06a23e9d77fde78a18d1810ee85e7c38bd08e109760a7bdeaa6aa7ab2c5bcd1aad91b38a6cf27#npm:10.5.0"],\
             ["typescript", "patch:typescript@npm%3A4.5.5#~builtin<compat/typescript>::version=4.5.5&hash=bda367"]\
           ],\
           "linkType": "SOFT"\
@@ -1610,10 +1629,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           ],\
           "linkType": "SOFT"\
         }],\
-        ["virtual:9fe0e66f294764ea01de281adef3355862b5c3d0e622435325fc5dee7179e98aa0f48da493a8de1564e4a4e1d45f38c93e607c518eaa867362d74a22d594f28f#npm:10.5.0", {\
-          "packageLocation": "./.yarn/__virtual__/ts-node-virtual-af76d2a877/0/cache/ts-node-npm-10.5.0-818635380a-d51ac8a9b3.zip/node_modules/ts-node/",\
+        ["virtual:b488ce5303f24f7080646d4d67eb5b458e52968e4971d80a08d06a23e9d77fde78a18d1810ee85e7c38bd08e109760a7bdeaa6aa7ab2c5bcd1aad91b38a6cf27#npm:10.5.0", {\
+          "packageLocation": "./.yarn/__virtual__/ts-node-virtual-e8b5e7fe73/0/cache/ts-node-npm-10.5.0-818635380a-d51ac8a9b3.zip/node_modules/ts-node/",\
           "packageDependencies": [\
-            ["ts-node", "virtual:9fe0e66f294764ea01de281adef3355862b5c3d0e622435325fc5dee7179e98aa0f48da493a8de1564e4a4e1d45f38c93e607c518eaa867362d74a22d594f28f#npm:10.5.0"],\
+            ["ts-node", "virtual:b488ce5303f24f7080646d4d67eb5b458e52968e4971d80a08d06a23e9d77fde78a18d1810ee85e7c38bd08e109760a7bdeaa6aa7ab2c5bcd1aad91b38a6cf27#npm:10.5.0"],\
             ["@cspotcode/source-map-support", "npm:0.7.0"],\
             ["@swc/core", null],\
             ["@swc/wasm", null],\
