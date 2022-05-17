@@ -52,8 +52,15 @@ class Client extends StatePlay {
 
 const client = new Client();
 
-client.addListener(PlayerPositionUpdatedEvent, console.log);
-client.addListener(ChunkUpdatedEvent, console.log);
+// client.addListener(PlayerPositionUpdatedEvent, console.log);
+client.addListener(ChunkUpdatedEvent, (event) => {
+  console.log(JSON.stringify(event.payload, (key, value) =>
+  typeof value === 'bigint'
+      ? value.toString()
+      : value // return everything else unchanged
+  ), 2);
+  process.exit(0);
+});
 
 protocol({
   host: 'localhost',
