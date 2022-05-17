@@ -1,5 +1,6 @@
 import { Packet, StatePlay, protocol } from 'protocol';
 import { ChunkUpdatedEvent } from './events/ChunkUpdated.event';
+import { KeepAliveReceivedEvent } from './events/KeepAliveReceived.event';
 import { LivingEntitySpawnedEvent } from './events/LivingEntitySpawned.event';
 import { PlayerPositionUpdatedEvent } from './events/PlayerPositionUpdated.event';
 import { PlayerSpawnedEvent } from './events/PlayerSpawned.event';
@@ -8,6 +9,7 @@ import { EventCtor, IEvent } from './events/types';
 const packetToEvent: Record<number, EventCtor<any>> = {
   0x02: LivingEntitySpawnedEvent,
   0x04: PlayerSpawnedEvent,
+  0x21: KeepAliveReceivedEvent,
   0x22: ChunkUpdatedEvent,
   0x38: PlayerPositionUpdatedEvent,
 }
@@ -16,10 +18,18 @@ class Client extends StatePlay {
   private eventHandlers: Map<EventCtor<any>, ((event: IEvent) => void)[]> = new Map();
 
   public async receive (packet: Packet): Promise<void> {
+    if (packet.id === 0x21) {
+      this.send({
+        id: 0x0F,
+        data: packet.data,
+      });   
+    }
+
     if (packet.id in packetToEvent) {
       const eventCtor = packetToEvent[packet.id];
-        const event = await eventCtor.fromPacket(packet);
-        this.publishEvent(eventCtor, event);
+      const event = await eventCtor.fromPacket(packet);
+      
+      this.publishEvent(eventCtor, event);
     }
 
     // console.log(packet.id.toString(16));
@@ -69,6 +79,6 @@ client.addListener(PlayerPositionUpdatedEvent, console.log);
 protocol({
   host: 'localhost',
   port: 25565,
-  username: 'Bot2',
+  username: 'Bot3',
   playHandler: client,
 });
