@@ -32,6 +32,10 @@ export const parseString =
     return b.readString(length, 'utf-8');
   };
 
+export const parseUUID =
+  () =>
+  (b: SmartBuffer) => b.readBuffer(16).toString('hex');
+
 export const parseByteArray =
   () =>
   (b: SmartBuffer) => {
@@ -59,6 +63,10 @@ export const parseShort =
 export const parseInt =
   () =>
   (b: SmartBuffer) => b.readInt32BE();
+
+export const parseByte =
+  () =>
+  (b: SmartBuffer) => b.readUInt8();
 
 export const parseBoolean =
   () =>

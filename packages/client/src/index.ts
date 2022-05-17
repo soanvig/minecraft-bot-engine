@@ -1,12 +1,15 @@
 import { Packet, StatePlay, protocol } from 'protocol';
 import { ChunkUpdatedEvent } from './events/ChunkUpdated.event';
+import { LivingEntitySpawnedEvent } from './events/LivingEntitySpawned.event';
 import { PlayerPositionUpdatedEvent } from './events/PlayerPositionUpdated.event';
+import { PlayerSpawnedEvent } from './events/PlayerSpawned.event';
 import { EventCtor, IEvent } from './events/types';
 
 const packetToEvent: Record<number, EventCtor<any>> = {
-  // this event is not always published, dunno why
-  0x38: PlayerPositionUpdatedEvent,
+  0x02: LivingEntitySpawnedEvent,
+  0x04: PlayerSpawnedEvent,
   0x22: ChunkUpdatedEvent,
+  0x38: PlayerPositionUpdatedEvent,
 }
 
 class Client extends StatePlay {
@@ -52,15 +55,16 @@ class Client extends StatePlay {
 
 const client = new Client();
 
-// client.addListener(PlayerPositionUpdatedEvent, console.log);
-client.addListener(ChunkUpdatedEvent, (event) => {
-  console.log(JSON.stringify(event.payload, (key, value) =>
-  typeof value === 'bigint'
-      ? value.toString()
-      : value // return everything else unchanged
-  ), 2);
-  process.exit(0);
-});
+client.addListener(PlayerSpawnedEvent, console.log);
+client.addListener(PlayerPositionUpdatedEvent, console.log);
+// client.addListener(ChunkUpdatedEvent, (event) => {
+//   console.log(JSON.stringify(event.payload, (key, value) =>
+//   typeof value === 'bigint'
+//       ? value.toString()
+//       : value // return everything else unchanged
+//   ), 2);
+//   process.exit(0);
+// });
 
 protocol({
   host: 'localhost',

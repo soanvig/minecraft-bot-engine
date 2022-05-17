@@ -14,6 +14,9 @@ interface Payload {
   // which is irrelevant for us
 }
 
+/**
+ * @NOTE in progress
+ */
 export class ChunkUpdatedEvent implements IEvent {
   private constructor (public readonly payload: Payload) {}
 
