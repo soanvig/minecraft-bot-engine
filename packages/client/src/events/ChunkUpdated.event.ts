@@ -1,4 +1,4 @@
-import { Packet, parsePacket, parseDouble, parseFloat, parseBuffer, parseVarInt, parseBoolean, parseInt, parseNBT, parseByteArray } from 'protocol';
+import { Packet, parsePacketData, parseDouble, parseFloat, parseBuffer, parseVarInt, parseBoolean, parseInt, parseNBT, parseByteArray, parseIterate, parseObject, parseShort } from 'protocol';
 import { IEvent } from './types';
 
 interface Payload {
@@ -17,13 +17,26 @@ export class ChunkUpdatedEvent implements IEvent {
   private constructor (public readonly payload: Payload) {}
 
   public static async fromPacket(packet: Packet) {
-    return new ChunkUpdatedEvent(await parsePacket(packet, {
+    const [firstPart, unparsedData] = await parsePacketData(packet.data, {
       x: parseInt(),
       z: parseInt(),
       heightmaps: parseNBT(),
       data: parseByteArray(),
       blockEntitiesCount: parseVarInt(),
-      blockEntities: parseBuffer(1), /** @TODO whatever for now */
-    }));
+    });
+
+    const [secondPart] = await parsePacketData(unparsedData, {
+      blockEntities: parseIterate(firstPart.blockEntitiesCount, parseObject({
+        xz: parseBuffer(1), // Split into to values
+        y: parseShort(),
+        type: parseVarInt(),
+        data: parseNBT(),
+      }))
+    })
+
+    return new ChunkUpdatedEvent({
+      ...firstPart,
+      ...secondPart,
+    });
   }
 }

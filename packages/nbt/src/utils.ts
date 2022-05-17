@@ -1,10 +1,10 @@
 import { SmartBuffer } from 'smart-buffer';
 
-export const times = <T>(n: number, cb: () => T): T[] => {
+export const times = async <T>(n: number, cb: () => T): Promise<T[]> => {
   const result: T[] = [];
   
   for (let i = 0; i < n; i += 1) {
-    result.push(cb());
+    result.push(await cb());
   }
 
   return result;

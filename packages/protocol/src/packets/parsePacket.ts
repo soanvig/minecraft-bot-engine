@@ -1,5 +1,4 @@
 import { SmartBuffer } from '../SmartBuffer';
-import { Packet } from './packet';
 import { decodeNBT } from 'nbt';
 import { times } from './utils';
 
@@ -7,15 +6,18 @@ type Parser<T> = (b: SmartBuffer) => T | Promise<T>;
 type PromiseResult<T> = T extends Promise<infer R> ? R : T;
 type SchemaParserResult<P extends Parser<any>, T extends Record<string, P>> = {
   [K in keyof T]: PromiseResult<ReturnType<T[K]>>;
-};
+}
 
-export const parsePacket = async <P extends Parser<any>, T extends Record<string, P>>(
-  packet: Packet,
+export const parsePacketData = async <P extends Parser<any>, T extends Record<string, P>>(
+  packet: Buffer,
   schema: T
-): Promise<SchemaParserResult<P, T>> => {
-  const smartBuffer = SmartBuffer.fromBuffer(packet.data);
+): Promise<[SchemaParserResult<P, T>, Buffer]> => {
+  const smartBuffer = SmartBuffer.fromBuffer(packet);
 
-  return parseObject(schema)(smartBuffer);
+  const parsed = await parseObject(schema)(smartBuffer);
+  const unparsed = smartBuffer.readBuffer();
+
+  return [parsed, unparsed];
 }
 
 export const parseVarInt =
@@ -50,17 +52,21 @@ export const parseDouble =
   () =>
   (b: SmartBuffer) => b.readDoubleBE();
 
+export const parseShort =
+  () =>
+  (b: SmartBuffer) => b.readInt16BE();
+
+export const parseInt =
+  () =>
+  (b: SmartBuffer) => b.readInt32BE();
+
 export const parseBoolean =
   () =>
   (b: SmartBuffer) => Boolean(b.readBuffer(1)[0]);
 
 export const parseNBT =
   () =>
-  (b: SmartBuffer) => decodeNBT(b);
-
-export const parseInt =
-  () =>
-  (b: SmartBuffer) => b.readInt32BE();
+  async (b: SmartBuffer) => await decodeNBT(b);
 
 export const parseObject =
   <P extends Parser<any>,
@@ -79,6 +85,6 @@ export const parseObject =
 
 export const parseIterate =
   <T>(n: number, parser: (b: SmartBuffer) => T) =>
-  (b: SmartBuffer): T[] => {
-    return times(n, () => parser(b));
+  async (b: SmartBuffer): Promise<T[]> => {
+    return await times(n, () => parser(b));
   }

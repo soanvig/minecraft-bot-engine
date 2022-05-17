@@ -1,5 +1,5 @@
 import { Packet } from '../packets/packet';
-import { parseBuffer, parsePacket, parseString, parseVarInt } from '../packets/parsePacket';
+import { parseBuffer, parsePacketData, parseString, parseVarInt } from '../packets/parsePacket';
 import { SmartBuffer } from '../SmartBuffer';
 import { State, StateId } from './State';
 
@@ -18,7 +18,7 @@ export class StateLogin extends State {
 
   public async receive (packet: Packet): Promise<void> {
     if (packet.id === 3) {
-      const { maxPacketSize } = await parsePacket(packet, {
+      const [{ maxPacketSize }] = await parsePacketData(packet.data, {
         maxPacketSize: parseVarInt(),
       })
 
@@ -26,7 +26,7 @@ export class StateLogin extends State {
     }
 
     if (packet.id === 2) {
-      const result = await parsePacket(packet, {
+      const [result] = await parsePacketData(packet.data, {
         // md5(OfflinePlayer:Nickname)
         uuid: parseBuffer(16),
         nickname: parseString(),

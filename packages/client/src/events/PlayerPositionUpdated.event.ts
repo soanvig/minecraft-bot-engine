@@ -1,4 +1,4 @@
-import { Packet, parsePacket, parseDouble, parseFloat, parseBuffer, parseVarInt, parseBoolean } from 'protocol';
+import { Packet, parsePacketData, parseDouble, parseFloat, parseBuffer, parseVarInt, parseBoolean } from 'protocol';
 import { IEvent } from './types';
 
 interface Payload {
@@ -16,7 +16,7 @@ export class PlayerPositionUpdatedEvent implements IEvent {
   private constructor (public readonly payload: Payload) {}
 
   public static async fromPacket(packet: Packet) {
-    return new PlayerPositionUpdatedEvent(await parsePacket(packet, {
+    const [data] = await parsePacketData(packet.data, {
       x: parseDouble(),
       y: parseDouble(),
       z: parseDouble(),
@@ -25,6 +25,8 @@ export class PlayerPositionUpdatedEvent implements IEvent {
       flags: parseBuffer(1),
       teleportId: parseVarInt(),
       shouldDismountVehicle: parseBoolean(),
-    }));
+    });
+
+    return new PlayerPositionUpdatedEvent(data);
   }
 }

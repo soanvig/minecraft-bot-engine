@@ -15,8 +15,8 @@ class Client extends StatePlay {
   public async receive (packet: Packet): Promise<void> {
     if (packet.id in packetToEvent) {
       const eventCtor = packetToEvent[packet.id];
-
-      this.publishEvent(eventCtor, await eventCtor.fromPacket(packet));
+        const event = await eventCtor.fromPacket(packet);
+        this.publishEvent(eventCtor, event);
     }
 
     // console.log(packet.id.toString(16));
@@ -53,7 +53,7 @@ class Client extends StatePlay {
 const client = new Client();
 
 client.addListener(PlayerPositionUpdatedEvent, console.log);
-// client.addListener(ChunkUpdatedEvent, console.log);
+client.addListener(ChunkUpdatedEvent, console.log);
 
 protocol({
   host: 'localhost',

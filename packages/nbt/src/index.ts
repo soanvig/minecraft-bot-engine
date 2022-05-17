@@ -1,3 +1,4 @@
+import { writeFileSync } from 'fs';
 import { SmartBuffer } from 'smart-buffer';
 import { promisify } from 'util';
 import { gunzip as asyncGunzip } from 'zlib';
@@ -76,7 +77,7 @@ const parseType = async (b: SmartBuffer, type: number): Promise<any> => {
     case NBTType.Double:
       return b.readDoubleBE();
     case NBTType.ByteArray:
-      return times(b.readInt32BE(), () => b.readInt8());
+      return await times(b.readInt32BE(), () => b.readInt8());
     case NBTType.String:
       const stringLength = b.readUInt16BE();
       const stringBuffer = b.readBuffer(stringLength);
@@ -84,9 +85,9 @@ const parseType = async (b: SmartBuffer, type: number): Promise<any> => {
       return parseModifiedUtf8(stringBuffer);
     case NBTType.List:
       const listType = b.readInt8();
-      return times(b.readInt32BE(), () => ({
+      return await times(b.readInt32BE(), async () => ({
         type: listType,
-        payload: parseType(b, listType)
+        payload: await parseType(b, listType)
       }));
     case NBTType.Compound:
       const compound = [];
@@ -133,8 +134,7 @@ const parseNBT = async (b: SmartBuffer): Promise<NBT> => {
         type,
       }
     default: 
-      const nameLength = b.readInt16BE();
-      const name = b.readString(nameLength, 'utf-8');
+      const name = await parseType(b, NBTType.String)
     
       return {
         type,
@@ -153,8 +153,9 @@ export const decodeNBT = async (buffer: Buffer | SmartBuffer): Promise<NBT> => {
     : SmartBuffer.fromBuffer(buffer);
 
   if (hasGzipHeader(b)) {
+    throw new Error('NBT is compressed! We dont support that for now, because it drains the buffer');
     b = SmartBuffer.fromBuffer(await gunzip(b.readBuffer()));
   }
 
-  return parseNBT(b);
+  return await parseNBT(b);
 }
