@@ -1,5 +1,8 @@
 import { Packet, StatePlay, protocol } from 'protocol';
 import { ChunkUpdatedEvent } from './events/ChunkUpdated.event';
+import { EntityPositionChangedEvent } from './events/EntityPositionChanged.event';
+import { EntityPositionRotationChangedEvent } from './events/EntityPositionRotationChanged.event';
+import { EntityRotationChangedEvent } from './events/EntityRotationChanged.event';
 import { KeepAliveReceivedEvent } from './events/KeepAliveReceived.event';
 import { LivingEntitySpawnedEvent } from './events/LivingEntitySpawned.event';
 import { PlayerPositionUpdatedEvent } from './events/PlayerPositionUpdated.event';
@@ -11,6 +14,9 @@ const packetToEvent: Record<number, EventCtor<any>> = {
   0x04: PlayerSpawnedEvent,
   0x21: KeepAliveReceivedEvent,
   0x22: ChunkUpdatedEvent,
+  0x29: EntityPositionChangedEvent,
+  0x2A: EntityPositionRotationChangedEvent,
+  0x2B: EntityRotationChangedEvent,
   0x38: PlayerPositionUpdatedEvent,
 }
 
@@ -28,7 +34,7 @@ class Client extends StatePlay {
     if (packet.id in packetToEvent) {
       const eventCtor = packetToEvent[packet.id];
       const event = await eventCtor.fromPacket(packet);
-      
+
       this.publishEvent(eventCtor, event);
     }
 
@@ -67,6 +73,9 @@ const client = new Client();
 
 client.addListener(PlayerSpawnedEvent, console.log);
 client.addListener(PlayerPositionUpdatedEvent, console.log);
+client.addListener(EntityPositionRotationChangedEvent, console.log);
+client.addListener(EntityPositionChangedEvent, console.log);
+client.addListener(EntityRotationChangedEvent, console.log);
 // client.addListener(ChunkUpdatedEvent, (event) => {
 //   console.log(JSON.stringify(event.payload, (key, value) =>
 //   typeof value === 'bigint'
