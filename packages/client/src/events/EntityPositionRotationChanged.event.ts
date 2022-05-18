@@ -15,7 +15,7 @@ export class EntityPositionRotationChangedEvent implements IEvent {
   private constructor (public readonly payload: Payload) {}
 
   public static async fromPacket(packet: Packet) {
-    const [data] = await parsePacketData(packet.data, {
+    const [data] = parsePacketData(packet.data, {
       id: parseVarInt(),
       deltaX: parseShort(),
       deltaY: parseShort(),

@@ -12,11 +12,11 @@ interface Payload {
   shouldDismountVehicle: boolean;
 }
 
-export class PlayerPositionUpdatedEvent implements IEvent {
+export class PlayerPositionChangedEvent implements IEvent {
   private constructor (public readonly payload: Payload) {}
 
   public static async fromPacket(packet: Packet) {
-    const [data] = await parsePacketData(packet.data, {
+    const [data] = parsePacketData(packet.data, {
       x: parseDouble(),
       y: parseDouble(),
       z: parseDouble(),
@@ -27,6 +27,6 @@ export class PlayerPositionUpdatedEvent implements IEvent {
       shouldDismountVehicle: parseBoolean(),
     });
 
-    return new PlayerPositionUpdatedEvent(data);
+    return new PlayerPositionChangedEvent(data);
   }
 }

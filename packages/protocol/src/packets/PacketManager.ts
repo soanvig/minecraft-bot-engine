@@ -1,5 +1,5 @@
 import { Socket } from 'net';
-import { pipe, Observable, OperatorFunction, Subject, Subscription, concatMap } from 'rxjs';
+import { pipe, Observable, OperatorFunction, Subject, Subscription, concatMap, tap } from 'rxjs';
 import { streamToRx } from 'rxjs-stream';
 import { decodeCompressedPacket, decodePacket, Decoder, encodeCompressedPacket, encodePacket, Encoder, Packet } from './packet';
 

@@ -62,7 +62,7 @@ const parseModifiedUtf8 = (buffer: Buffer): string => {
   return String.fromCharCode.apply(null, codepoints);
 }
 
-const parseType = async (b: SmartBuffer, type: number): Promise<any> => {
+const parseType = (b: SmartBuffer, type: number): any => {
   switch (type) {
     case NBTType.Byte:
       return b.readInt8();
@@ -77,7 +77,7 @@ const parseType = async (b: SmartBuffer, type: number): Promise<any> => {
     case NBTType.Double:
       return b.readDoubleBE();
     case NBTType.ByteArray:
-      return await times(b.readInt32BE(), () => b.readInt8());
+      return times(b.readInt32BE(), () => b.readInt8());
     case NBTType.String:
       const stringLength = b.readUInt16BE();
       const stringBuffer = b.readBuffer(stringLength);
@@ -85,15 +85,15 @@ const parseType = async (b: SmartBuffer, type: number): Promise<any> => {
       return parseModifiedUtf8(stringBuffer);
     case NBTType.List:
       const listType = b.readInt8();
-      return await times(b.readInt32BE(), async () => ({
+      return times(b.readInt32BE(), () => ({
         type: listType,
-        payload: await parseType(b, listType)
+        payload: parseType(b, listType)
       }));
     case NBTType.Compound:
       const compound = [];
 
       while (true) {
-        const tag = await parseNBT(b);
+        const tag = parseNBT(b);
 
         if (tag.type === NBTType.End) {
           break;
@@ -125,7 +125,7 @@ export type NBT =
   | { type: NBTType.IntArray, name: string, payload: number[] }
   | { type: NBTType.LongArray, name: string, payload: BigInt[] }
 
-const parseNBT = async (b: SmartBuffer): Promise<NBT> => {
+const parseNBT = (b: SmartBuffer): NBT => {
   const type = b.readUInt8();
 
   switch (type) {
@@ -134,12 +134,12 @@ const parseNBT = async (b: SmartBuffer): Promise<NBT> => {
         type,
       }
     default: 
-      const name = await parseType(b, NBTType.String)
+      const name = parseType(b, NBTType.String)
     
       return {
         type,
         name,
-        payload: await parseType(b, type),
+        payload: parseType(b, type),
       }
   }
 }
@@ -147,15 +147,16 @@ const parseNBT = async (b: SmartBuffer): Promise<NBT> => {
 /**
  * @param buffer - Buffer or SmartBuffer. Warning - if it is SmartBuffer and it is compressed with gzip, the whole SmartBuffer will be read. Otherwise SmartBuffer's read offset will be forwared only as far as necessary.
  */
-export const decodeNBT = async (buffer: Buffer | SmartBuffer): Promise<NBT> => {
+export const decodeNBT = (buffer: Buffer | SmartBuffer): NBT => {
   let b = buffer instanceof SmartBuffer
     ? buffer
     : SmartBuffer.fromBuffer(buffer);
 
   if (hasGzipHeader(b)) {
+    /** @TODO @NOTE https://github.com/PrismarineJS/node-minecraft-protocol/blob/master/src/datatypes/minecraft.js#L63 */
     throw new Error('NBT is compressed! We dont support that for now, because it drains the buffer');
-    b = SmartBuffer.fromBuffer(await gunzip(b.readBuffer()));
+    // b = SmartBuffer.fromBuffer(await gunzip(b.readBuffer()));
   }
 
-  return await parseNBT(b);
+  return parseNBT(b);
 }

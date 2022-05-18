@@ -2,19 +2,19 @@ import { SmartBuffer } from '../SmartBuffer';
 import { decodeNBT } from 'nbt';
 import { times } from './utils';
 
-type Parser<T> = (b: SmartBuffer) => T | Promise<T>;
-type PromiseResult<T> = T extends Promise<infer R> ? R : T;
+/** @TODO add typing to ctx */
+type Parser<T> = (b: SmartBuffer, ctx: any) => T;
 type SchemaParserResult<P extends Parser<any>, T extends Record<string, P>> = {
-  [K in keyof T]: PromiseResult<ReturnType<T[K]>>;
+  [K in keyof T]: ReturnType<T[K]>;
 }
 
-export const parsePacketData = async <P extends Parser<any>, T extends Record<string, P>>(
+export const parsePacketData = <P extends Parser<any>, T extends Record<string, P>>(
   packet: Buffer,
   schema: T
-): Promise<[SchemaParserResult<P, T>, Buffer]> => {
+): [SchemaParserResult<P, T>, Buffer] => {
   const smartBuffer = SmartBuffer.fromBuffer(packet);
 
-  const parsed = await parseObject(schema)(smartBuffer);
+  const parsed = parseObject(schema)(smartBuffer, {});
   const unparsed = smartBuffer.readBuffer();
 
   return [parsed, unparsed];
@@ -74,25 +74,25 @@ export const parseBoolean =
 
 export const parseNBT =
   () =>
-  async (b: SmartBuffer) => await decodeNBT(b);
+   (b: SmartBuffer) => decodeNBT(b);
 
 export const parseObject =
   <P extends Parser<any>,
-  T extends Record<string, P>>(schema: T) =>
-  async (b: SmartBuffer): Promise<SchemaParserResult<P, T>> => {
+  T extends Record<string, P>>(schema: T) => 
+   (b: SmartBuffer, ctx: any): SchemaParserResult<P, T> => {
     const result = {} as SchemaParserResult<P, T>;
 
     for (const prop in schema) {
       const parser = schema[prop];
 
-      result[prop] = await parser(b);
+      result[prop] = parser(b, result);
     }
 
     return result;
   }
 
 export const parseIterate =
-  <T>(n: number, parser: (b: SmartBuffer) => T) =>
-  async (b: SmartBuffer): Promise<T[]> => {
-    return await times(n, () => parser(b));
+  <T>(n: number, parser: (b: SmartBuffer, ctx: any) => T) =>
+   (b: SmartBuffer): T[] => {
+    return times(n, () => parser(b, {}));
   }

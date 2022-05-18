@@ -21,7 +21,7 @@ export class ChunkUpdatedEvent implements IEvent {
   private constructor (public readonly payload: Payload) {}
 
   public static async fromPacket(packet: Packet) {
-    const [firstPart, unparsedData] = await parsePacketData(packet.data, {
+    const [firstPart, unparsedData] = parsePacketData(packet.data, {
       x: parseInt(),
       z: parseInt(),
       heightmaps: parseNBT(),
@@ -29,7 +29,7 @@ export class ChunkUpdatedEvent implements IEvent {
       blockEntitiesCount: parseVarInt(),
     });
 
-    const [secondPart] = await parsePacketData(unparsedData, {
+    const [secondPart] = parsePacketData(unparsedData, {
       blockEntities: parseIterate(firstPart.blockEntitiesCount, parseObject({
         xz: parseBuffer(1), // Split into to values
         y: parseShort(),

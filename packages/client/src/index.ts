@@ -1,11 +1,12 @@
-import { Packet, StatePlay, protocol } from 'protocol';
+import { Packet, StatePlay, protocol, SmartBuffer } from 'protocol';
 import { ChunkUpdatedEvent } from './events/ChunkUpdated.event';
 import { EntityPositionChangedEvent } from './events/EntityPositionChanged.event';
 import { EntityPositionRotationChangedEvent } from './events/EntityPositionRotationChanged.event';
 import { EntityRotationChangedEvent } from './events/EntityRotationChanged.event';
 import { KeepAliveReceivedEvent } from './events/KeepAliveReceived.event';
 import { LivingEntitySpawnedEvent } from './events/LivingEntitySpawned.event';
-import { PlayerPositionUpdatedEvent } from './events/PlayerPositionUpdated.event';
+import { PlayerInfoReceivedEvent, PlayersJoinedEvent } from './events/PlayerInfoReceived.event';
+import { PlayerPositionChangedEvent } from './events/PlayerPositionChanged.event';
 import { PlayerSpawnedEvent } from './events/PlayerSpawned.event';
 import { EventCtor, IEvent } from './events/types';
 
@@ -17,7 +18,9 @@ const packetToEvent: Record<number, EventCtor<any>> = {
   0x29: EntityPositionChangedEvent,
   0x2A: EntityPositionRotationChangedEvent,
   0x2B: EntityRotationChangedEvent,
-  0x38: PlayerPositionUpdatedEvent,
+  /** @NOTE this packet behaves very strange. It should make action 0 when players joins but it doesn't */
+  0x36: PlayerInfoReceivedEvent,
+  0x38: PlayerPositionChangedEvent,
 }
 
 class Client extends StatePlay {
@@ -41,7 +44,8 @@ class Client extends StatePlay {
     // console.log(packet.id.toString(16));
   }
 
-  public async onSwitchTo (): Promise<void> {}
+  public async onSwitchTo (): Promise<void> {
+  }
 
   /**
    * @returns unsubscribe listener function
@@ -72,10 +76,11 @@ class Client extends StatePlay {
 const client = new Client();
 
 client.addListener(PlayerSpawnedEvent, console.log);
-client.addListener(PlayerPositionUpdatedEvent, console.log);
-client.addListener(EntityPositionRotationChangedEvent, console.log);
-client.addListener(EntityPositionChangedEvent, console.log);
+// client.addListener(PlayerPositionChangedEvent, console.log);
+// client.addListener(EntityPositionRotationChangedEvent, console.log);
+// client.addListener(EntityPositionChangedEvent, console.log);
 client.addListener(EntityRotationChangedEvent, console.log);
+client.addListener(PlayerInfoReceivedEvent, console.log);
 // client.addListener(ChunkUpdatedEvent, (event) => {
 //   console.log(JSON.stringify(event.payload, (key, value) =>
 //   typeof value === 'bigint'

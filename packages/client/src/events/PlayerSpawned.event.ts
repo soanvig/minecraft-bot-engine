@@ -15,7 +15,7 @@ export class PlayerSpawnedEvent implements IEvent {
   private constructor (public readonly payload: Payload) {}
 
   public static async fromPacket(packet: Packet) {
-    const [data] = await parsePacketData(packet.data, {
+    const [data] = parsePacketData(packet.data, {
       id: parseVarInt(),
       uuid: parseUUID(),
       x: parseDouble(),

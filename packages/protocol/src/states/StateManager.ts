@@ -1,4 +1,4 @@
-import { mergeMap, Subscription } from 'rxjs';
+import { concatMap, mergeMap, Subscription } from 'rxjs';
 import { PacketManager } from '../packets/PacketManager';
 import { State, StateId } from './State';
 
@@ -18,7 +18,7 @@ export class StateManager {
     this.states = states;
 
     this.packetSubscription = this.packetManager.packets.pipe(
-      mergeMap((p) => this.activeState.receive(p))
+      concatMap((p) => this.activeState.receive(p))
     ).subscribe();
 
     states.forEach(state => state.init({

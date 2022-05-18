@@ -6,4 +6,4 @@ const input = readFileSync('./debug').slice(8);
 console.log(input.length);
 console.log(input);
 
-decodeNBT(input).then(console.log);
+console.log(decodeNBT(input))

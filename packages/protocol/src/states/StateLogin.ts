@@ -18,7 +18,7 @@ export class StateLogin extends State {
 
   public async receive (packet: Packet): Promise<void> {
     if (packet.id === 3) {
-      const [{ maxPacketSize }] = await parsePacketData(packet.data, {
+      const [{ maxPacketSize }] = parsePacketData(packet.data, {
         maxPacketSize: parseVarInt(),
       })
 
@@ -26,7 +26,7 @@ export class StateLogin extends State {
     }
 
     if (packet.id === 2) {
-      const [result] = await parsePacketData(packet.data, {
+      const [result] = parsePacketData(packet.data, {
         // md5(OfflinePlayer:Nickname)
         uuid: parseBuffer(16),
         nickname: parseString(),
