@@ -19,7 +19,9 @@ export class StateManager {
 
     this.packetSubscription = this.packetManager.packets.pipe(
       concatMap((p) => this.activeState.receive(p))
-    ).subscribe();
+    ).subscribe({
+      error: console.error,
+    });
 
     states.forEach(state => state.init({
       send: p => this.packetManager.send(p),

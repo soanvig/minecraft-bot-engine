@@ -40,8 +40,6 @@ class Client extends StatePlay {
 
       this.publishEvent(eventCtor, event);
     }
-
-    // console.log(packet.id.toString(16));
   }
 
   public async onSwitchTo (): Promise<void> {
@@ -75,11 +73,11 @@ class Client extends StatePlay {
 
 const client = new Client();
 
-client.addListener(PlayerSpawnedEvent, console.log);
+// client.addListener(PlayerSpawnedEvent, console.log);
 // client.addListener(PlayerPositionChangedEvent, console.log);
 // client.addListener(EntityPositionRotationChangedEvent, console.log);
 // client.addListener(EntityPositionChangedEvent, console.log);
-client.addListener(EntityRotationChangedEvent, console.log);
+// client.addListener(EntityRotationChangedEvent, console.log);
 client.addListener(PlayerInfoReceivedEvent, console.log);
 // client.addListener(ChunkUpdatedEvent, (event) => {
 //   console.log(JSON.stringify(event.payload, (key, value) =>
@@ -93,6 +91,6 @@ client.addListener(PlayerInfoReceivedEvent, console.log);
 protocol({
   host: 'localhost',
   port: 25565,
-  username: 'Bot3',
+  username: 'Bot4',
   playHandler: client,
 });
