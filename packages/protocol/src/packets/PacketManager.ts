@@ -1,6 +1,7 @@
 import { Socket } from 'net';
-import { pipe, Observable, OperatorFunction, Subject, Subscription, concatMap, tap } from 'rxjs';
+import { pipe, Observable, OperatorFunction, Subject, Subscription, concatMap, tap, map } from 'rxjs';
 import { streamToRx } from 'rxjs-stream';
+import { SmartBuffer } from '../SmartBuffer';
 import { decodeCompressedPacket, decodePacket, Decoder, encodeCompressedPacket, encodePacket, Encoder, Packet } from './packet';
 
 /**
@@ -20,6 +21,7 @@ export class PacketManager {
     this.encoder = encodePacket;
 
     this.socketObservable = streamToRx(socket).pipe(
+      makeIncomingPacketSplitter(),
       this.makeIncomingPacketParser(),
     );
 
@@ -60,3 +62,29 @@ export class PacketManager {
     );
   }
 }
+
+const makeIncomingPacketSplitter = () => {
+  let buffer = Buffer.alloc(0);
+
+  return pipe(
+    map((chunk: Buffer) => Buffer.concat([buffer, chunk])),
+    concatMap((b) => {
+      const sb = SmartBuffer.fromBuffer(b);
+      const packets = [] as Buffer[];
+
+      while (true) {
+        try {
+          const length = sb.readVarInt();
+
+          packets.push(sb.readBuffer(length));
+        } catch (e) {
+          break;
+        }
+      }
+
+      buffer = sb.readBuffer();
+
+      return packets;
+    }),
+  )
+} 

@@ -33,7 +33,6 @@ export const encodePacket: Encoder = async ({ id, data }) => {
 export const decodePacket: Decoder = async (packet) => {
   const smartBuffer = SmartBuffer.fromBuffer(packet);
 
-  const length = smartBuffer.readVarInt();
   const id = smartBuffer.readVarInt();
   const data = smartBuffer;
 
@@ -45,8 +44,6 @@ export const decodePacket: Decoder = async (packet) => {
 
 export const decodeCompressedPacket = (compressionThreshold: number): Decoder => async (packet) => {
   const smartBuffer = SmartBuffer.fromBuffer(packet);
-
-  const packetLength = smartBuffer.readVarInt();
   const dataLength = smartBuffer.readVarInt();
 
   if (dataLength < compressionThreshold) {
