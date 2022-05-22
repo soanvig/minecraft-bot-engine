@@ -3,7 +3,7 @@ import { decodeNBT } from 'nbt';
 import { times } from './utils';
 
 /** @TODO add typing to ctx */
-type Parser<T> = (b: SmartBuffer, ctx: any) => T;
+export type Parser<T> = (b: SmartBuffer, ctx: any) => T;
 type SchemaParserResult<P extends Parser<any>, T extends Record<string, P>> = {
   [K in keyof T]: ReturnType<T[K]>;
 }

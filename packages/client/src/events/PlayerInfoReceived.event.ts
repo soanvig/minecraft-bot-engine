@@ -1,5 +1,5 @@
 import { Packet, SmartBuffer } from 'protocol';
-import { parsePacketData, parseVarInt, parseBoolean, parseIterate, parseUUID, parseString, parseObject } from '../parsePacket';
+import { parsePacketData, parseVarInt, parseBoolean, parseIterate, parseUUID, parseString, parseObject, Parser } from '../parsePacket';
 import { IEvent } from './types';
 
 interface PlayerInfoHeader {
@@ -36,14 +36,14 @@ type PlayerLeftPayload = {
   uuid: string;
 }[];
 
-const parsePlayers = (props: any) => {
+const parsePlayers = <P extends Parser<any>, T extends Record<string, P>>(playerSchema: T) => {
   return {
     playersCount: parseVarInt(),
-    player: (b: SmartBuffer, ctx: any) => {
+    players: (b: SmartBuffer, ctx: any) => {
       return parseIterate(ctx.playersCount, parseObject({
         uuid: parseUUID(),
-
-      }))
+        ...playerSchema,
+      }))(b);
     }
   }
 }
@@ -53,26 +53,22 @@ export class PlayersJoinedEvent implements IEvent {
 
   public static async fromPacket(packet: Packet) {
     const [data] = parsePacketData(packet.data, {
-      playersCount: parseVarInt(),
-      players: (b: SmartBuffer, ctx: any) => {
-        return parseIterate(ctx.playersCount, parseObject({
-          uuid: parseUUID(),
-          name: parseString(),
-          propertiesCount: parseVarInt(),
-          properties: (b: SmartBuffer, ctx: any) => {
-            return parseIterate(ctx.propertiesCount, parseObject({
-                name: parseString(),
-                value: parseString(),
-                isSigned: parseBoolean(),
-                signature: (b: SmartBuffer, ctx: any) => ctx.isSigned ? parseString()(b) : null,
-              }))(b);
-          },
-          gameMode: parseVarInt(),
-          ping: parseVarInt(),
-          hasDisplayName: parseBoolean(),
-          displayName: (b: SmartBuffer, ctx: any) => ctx.hasDisplayName ? parseString()(b) : null,
-        }))(b);
-      },
+      ...parsePlayers({
+        name: parseString(),
+        propertiesCount: parseVarInt(),
+        properties: (b: SmartBuffer, ctx: any) => {
+          return parseIterate(ctx.propertiesCount, parseObject({
+              name: parseString(),
+              value: parseString(),
+              isSigned: parseBoolean(),
+              signature: (b: SmartBuffer, ctx: any) => ctx.isSigned ? parseString()(b) : null,
+            }))(b);
+        },
+        gameMode: parseVarInt(),
+        ping: parseVarInt(),
+        hasDisplayName: parseBoolean(),
+        displayName: (b: SmartBuffer, ctx: any) => ctx.hasDisplayName ? parseString()(b) : null,
+      }),
     });
 
     return new PlayersJoinedEvent(data.players);
@@ -84,13 +80,9 @@ export class PlayersGameModeUpdatedEvent implements IEvent {
 
   public static async fromPacket(packet: Packet) {
     const [data] = parsePacketData(packet.data, {
-      playersCount: parseVarInt(),
-      players: (b: SmartBuffer, ctx: any) => {
-        return parseIterate(ctx.playersCount, parseObject({
-          uuid: parseUUID(),
-          gameMode: parseVarInt(),
-        }))(b);
-      },
+      ...parsePlayers({
+        gameMode: parseVarInt(),
+      })
     });
 
     return new PlayersGameModeUpdatedEvent(data.players);
@@ -102,13 +94,9 @@ export class PlayersPingUpdatedEvent implements IEvent {
 
   public static async fromPacket(packet: Packet) {
     const [data] = parsePacketData(packet.data, {
-      playersCount: parseVarInt(),
-      players: (b: SmartBuffer, ctx: any) => {
-        return parseIterate(ctx.playersCount, parseObject({
-          uuid: parseUUID(),
-          ping: parseVarInt(),
-        }))(b);
-      },
+      ...parsePlayers({
+        ping: parseVarInt(),
+      })
     });
 
     return new PlayersPingUpdatedEvent(data.players);
@@ -120,14 +108,10 @@ export class PlayersDisplayNameUpdatedEvent implements IEvent {
 
   public static async fromPacket(packet: Packet) {
     const [data] = parsePacketData(packet.data, {
-      playersCount: parseVarInt(),
-      players: (b: SmartBuffer, ctx: any) => {
-        return parseIterate(ctx.playersCount, parseObject({
-          uuid: parseUUID(),
-          hasDisplayName: parseBoolean(),
-          displayName: (b: SmartBuffer, ctx: any) => ctx.hasDisplayName ? parseString()(b) : null,
-        }))(b);
-      },
+      ...parsePlayers({
+        hasDisplayName: parseBoolean(),
+        displayName: (b: SmartBuffer, ctx: any) => ctx.hasDisplayName ? parseString()(b) : null,
+      })
     });
 
     return new PlayersDisplayNameUpdatedEvent(data.players);
@@ -139,12 +123,7 @@ export class PlayersLeftEvent implements IEvent {
 
   public static async fromPacket(packet: Packet) {
     const [data] = parsePacketData(packet.data, {
-      playersCount: parseVarInt(),
-      players: (b: SmartBuffer, ctx: any) => {
-        return parseIterate(ctx.playersCount, parseObject({
-          uuid: parseUUID(),
-        }))(b);
-      },
+      ...parsePlayers({}),
     });
 
     return new PlayersLeftEvent(data.players);
