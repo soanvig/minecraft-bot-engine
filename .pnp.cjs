@@ -21,6 +21,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:."\
       },\
       {\
+        "name": "bot",\
+        "reference": "workspace:packages/bot"\
+      },\
+      {\
         "name": "client",\
         "reference": "workspace:packages/client"\
       },\
@@ -36,6 +40,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
     "enableTopLevelFallback": true,\
     "ignorePatternData": "(^(?:\\\\.yarn\\\\/sdks(?:\\\\/(?!\\\\.{1,2}(?:\\\\/|$))(?:(?:(?!(?:^|\\\\/)\\\\.{1,2}(?:\\\\/|$)).)*?)|$))$)",\
     "fallbackExclusionList": [\
+      ["bot", ["workspace:packages/bot"]],\
       ["client", ["workspace:packages/client"]],\
       ["minecraft-bot-engine", ["workspace:."]],\
       ["nbt", ["workspace:packages/nbt"]],\
@@ -530,6 +535,19 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["balanced-match", "npm:1.0.2"]\
           ],\
           "linkType": "HARD"\
+        }]\
+      ]],\
+      ["bot", [\
+        ["workspace:packages/bot", {\
+          "packageLocation": "./packages/bot/",\
+          "packageDependencies": [\
+            ["bot", "workspace:packages/bot"],\
+            ["@types/node", "npm:17.0.31"],\
+            ["client", "workspace:packages/client"],\
+            ["ts-node", "virtual:b488ce5303f24f7080646d4d67eb5b458e52968e4971d80a08d06a23e9d77fde78a18d1810ee85e7c38bd08e109760a7bdeaa6aa7ab2c5bcd1aad91b38a6cf27#npm:10.5.0"],\
+            ["typescript", "patch:typescript@npm%3A4.5.5#~builtin<compat/typescript>::version=4.5.5&hash=bda367"]\
+          ],\
+          "linkType": "SOFT"\
         }]\
       ]],\
       ["brace-expansion", [\
