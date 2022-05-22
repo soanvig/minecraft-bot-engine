@@ -48,6 +48,10 @@ export const parseBuffer =
   (length: number) =>
   (b: SmartBuffer) => b.readBuffer(length);
 
+export const parseWholeBuffer =
+  () =>
+  (b: SmartBuffer) => b.readBuffer();
+
 export const parseFloat =
   () =>
   (b: SmartBuffer) => b.readFloatBE();

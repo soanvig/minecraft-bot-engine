@@ -1,6 +1,6 @@
 import { Packet } from 'protocol';
-import { parsePacketData, parseDouble, parseVarInt, parseUUID, parseByte } from '../parsePacket'
-import { IEvent } from './types';
+import { parseDouble, parseVarInt, parseUUID, parseByte } from '../parsePacket'
+import { EventSchema, IEvent } from './types';
 
 interface Payload {
   id: number;
@@ -13,19 +13,15 @@ interface Payload {
 }
 
 export class PlayerSpawnedEvent implements IEvent {
-  private constructor (public readonly payload: Payload) {}
+  public constructor (public readonly payload: Payload) {}
 
-  public static async fromPacket(packet: Packet) {
-    const [data] = parsePacketData(packet.data, {
-      id: parseVarInt(),
-      uuid: parseUUID(),
-      x: parseDouble(),
-      y: parseDouble(),
-      z: parseDouble(),
-      yaw: parseByte(),
-      pitch: parseByte(),
-    });
-
-    return new PlayerSpawnedEvent(data);
+  public static readonly schema: EventSchema<Payload> = {
+    id: parseVarInt(),
+    uuid: parseUUID(),
+    x: parseDouble(),
+    y: parseDouble(),
+    z: parseDouble(),
+    yaw: parseByte(),
+    pitch: parseByte(),
   }
 }

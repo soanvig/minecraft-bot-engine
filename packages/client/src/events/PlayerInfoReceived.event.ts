@@ -1,40 +1,55 @@
 import { Packet, SmartBuffer } from 'protocol';
 import { parsePacketData, parseVarInt, parseBoolean, parseIterate, parseUUID, parseString, parseObject, Parser } from '../parsePacket';
-import { IEvent } from './types';
+import { EventSchema, IEvent } from './types';
 
 interface PlayerInfoHeader {
   action: number;
 }
 
 type PlayerJoinedPayload = {
-  uuid: string;
-  name: string;
-  properties: { name: string; value: string; isSigned: boolean; signature: string | null }[];
-  gameMode: number;
-  ping: number;
-  hasDisplayName: boolean;
-  displayName: string | null;
-}[];
+  playersCount: number;
+  players: {
+    uuid: string;
+    name: string;
+    properties: { name: string; value: string; isSigned: boolean; signature: string | null }[];
+    gameMode: number;
+    ping: number;
+    hasDisplayName: boolean;
+    displayName: string | null;
+  }[]
+};
 
 type PlayerGameModeUpdatedPayload = {
-  uuid: string;
-  gameMode: number;
-}[];
+  playersCount: number;
+  players: {
+    uuid: string;
+    gameMode: number;
+  }[]
+}
 
 type PlayerPingUpdatedPayload = {
-  uuid: string;
-  ping: number;
-}[];
+  playersCount: number;
+  players: {
+    uuid: string;
+    ping: number;
+  }[];
+}
 
 type PlayerDisplayNameUpdatedPayload = {
-  uuid: string;
-  hasDisplayName: boolean;
-  displayName: string | null;
-}[];
+  playersCount: number;
+  players: {
+    uuid: string;
+    hasDisplayName: boolean;
+    displayName: string | null;
+  }[]
+};
 
 type PlayerLeftPayload = {
-  uuid: string;
-}[];
+  playersCount: number;
+  players: {
+    uuid: string;
+  }[]
+};
 
 const parsePlayers = <P extends Parser<any>, T extends Record<string, P>>(playerSchema: T) => {
   return {
@@ -49,104 +64,88 @@ const parsePlayers = <P extends Parser<any>, T extends Record<string, P>>(player
 }
 
 export class PlayersJoinedEvent implements IEvent {
-  private constructor (public readonly payload: PlayerJoinedPayload) {}
+  public constructor (public readonly payload: PlayerJoinedPayload) {}
 
-  public static async fromPacket(packet: Packet) {
-    const [data] = parsePacketData(packet.data, {
-      ...parsePlayers({
-        name: parseString(),
-        propertiesCount: parseVarInt(),
-        properties: (b: SmartBuffer, ctx: any) => {
-          return parseIterate(ctx.propertiesCount, parseObject({
-              name: parseString(),
-              value: parseString(),
-              isSigned: parseBoolean(),
-              signature: (b: SmartBuffer, ctx: any) => ctx.isSigned ? parseString()(b) : null,
-            }))(b);
-        },
-        gameMode: parseVarInt(),
-        ping: parseVarInt(),
-        hasDisplayName: parseBoolean(),
-        displayName: (b: SmartBuffer, ctx: any) => ctx.hasDisplayName ? parseString()(b) : null,
-      }),
-    });
-
-    return new PlayersJoinedEvent(data.players);
-  }
+  public static readonly schema: EventSchema<PlayerJoinedPayload> = {
+    ...parsePlayers({
+      name: parseString(),
+      propertiesCount: parseVarInt(),
+      properties: (b: SmartBuffer, ctx: any) => {
+        return parseIterate(ctx.propertiesCount, parseObject({
+            name: parseString(),
+            value: parseString(),
+            isSigned: parseBoolean(),
+            signature: (b: SmartBuffer, ctx: any) => ctx.isSigned ? parseString()(b) : null,
+          }))(b);
+      },
+      gameMode: parseVarInt(),
+      ping: parseVarInt(),
+      hasDisplayName: parseBoolean(),
+      displayName: (b: SmartBuffer, ctx: any) => ctx.hasDisplayName ? parseString()(b) : null,
+    }),
+  };
 }
 
 export class PlayersGameModeUpdatedEvent implements IEvent {
-  private constructor (public readonly payload: PlayerGameModeUpdatedPayload) {}
+  public constructor (public readonly payload: PlayerGameModeUpdatedPayload) {}
 
-  public static async fromPacket(packet: Packet) {
-    const [data] = parsePacketData(packet.data, {
-      ...parsePlayers({
-        gameMode: parseVarInt(),
-      })
-    });
-
-    return new PlayersGameModeUpdatedEvent(data.players);
+  public static readonly schema: EventSchema<PlayerGameModeUpdatedPayload> = {
+    ...parsePlayers({
+      gameMode: parseVarInt(),
+    })
   }
 }
 
 export class PlayersPingUpdatedEvent implements IEvent {
-  private constructor (public readonly payload: PlayerPingUpdatedPayload) {}
+  public constructor (public readonly payload: PlayerPingUpdatedPayload) {}
 
-  public static async fromPacket(packet: Packet) {
-    const [data] = parsePacketData(packet.data, {
-      ...parsePlayers({
-        ping: parseVarInt(),
-      })
-    });
-
-    return new PlayersPingUpdatedEvent(data.players);
+  public static readonly schema: EventSchema<PlayerPingUpdatedPayload> = {
+    ...parsePlayers({
+      ping: parseVarInt(),
+    })
   }
 }
 
 export class PlayersDisplayNameUpdatedEvent implements IEvent {
-  private constructor (public readonly payload: PlayerDisplayNameUpdatedPayload) {}
+  public constructor (public readonly payload: PlayerDisplayNameUpdatedPayload) {}
 
-  public static async fromPacket(packet: Packet) {
-    const [data] = parsePacketData(packet.data, {
-      ...parsePlayers({
-        hasDisplayName: parseBoolean(),
-        displayName: (b: SmartBuffer, ctx: any) => ctx.hasDisplayName ? parseString()(b) : null,
-      })
-    });
-
-    return new PlayersDisplayNameUpdatedEvent(data.players);
-  }
+  public static readonly schema: EventSchema<PlayerDisplayNameUpdatedPayload> = {
+    ...parsePlayers({
+      hasDisplayName: parseBoolean(),
+      displayName: (b: SmartBuffer, ctx: any) => ctx.hasDisplayName ? parseString()(b) : null,
+    })
+  };
 }
 
 export class PlayersLeftEvent implements IEvent {
-  private constructor (public readonly payload: PlayerLeftPayload) {}
+  public constructor (public readonly payload: PlayerLeftPayload) {}
 
-  public static async fromPacket(packet: Packet) {
-    const [data] = parsePacketData(packet.data, {
-      ...parsePlayers({}),
-    });
-
-    return new PlayersLeftEvent(data.players);
+  public static readonly schema: EventSchema<PlayerLeftPayload> = {
+    ...parsePlayers({}),
   }
 }
 
 export class PlayerInfoReceivedEvent implements IEvent {
-  private constructor (public readonly payload: PlayerInfoHeader) {}
+  public constructor (public readonly payload: PlayerInfoHeader) {}
 
-  public static async fromPacket(packet: Packet) {
+  public static fromPacket(packet: Packet) {
     const [header, restData] = parsePacketData(packet.data, {
       action: parseVarInt(),
     });
 
-    const restPacket = { id: packet.id, data: restData };
+    let event;
 
     switch (header.action) {
-      case 0: return await PlayersJoinedEvent.fromPacket(restPacket);
-      case 1: return await PlayersGameModeUpdatedEvent.fromPacket(restPacket);
-      case 2: return await PlayersPingUpdatedEvent.fromPacket(restPacket);
-      case 3: return await PlayersDisplayNameUpdatedEvent.fromPacket(restPacket);
-      case 4: return await PlayersLeftEvent.fromPacket(restPacket);
+      case 0: event = PlayersJoinedEvent; break
+      case 1: event = PlayersGameModeUpdatedEvent; break
+      case 2: event = PlayersPingUpdatedEvent; break
+      case 3: event = PlayersDisplayNameUpdatedEvent; break
+      case 4: event = PlayersLeftEvent; break
       default: throw new Error(`Unknown action ${header.action} for PlayerInfo packet`)
     }
+
+    const [data] = parsePacketData(restData, event.schema);
+    
+    return new event(data);
   }
 }

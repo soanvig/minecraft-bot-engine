@@ -1,6 +1,5 @@
-import { Packet } from 'protocol';
-import { parsePacketData, parseDouble, parseVarInt, parseUUID, parseShort, parseByte } from '../parsePacket';
-import { IEvent } from './types';
+import { parseDouble, parseVarInt, parseUUID, parseShort, parseByte } from '../parsePacket';
+import { EventSchema, IEvent } from './types';
 
 interface Payload {
   id: number;
@@ -18,24 +17,20 @@ interface Payload {
 }
 
 export class LivingEntitySpawnedEvent implements IEvent {
-  private constructor (public readonly payload: Payload) {}
+  public constructor (public readonly payload: Payload) {}
 
-  public static async fromPacket(packet: Packet) {
-    const [data] = parsePacketData(packet.data, {
-      id: parseVarInt(),
-      uuid: parseUUID(),
-      type: parseVarInt(),
-      x: parseDouble(),
-      y: parseDouble(),
-      z: parseDouble(),
-      yaw: parseByte(),
-      pitch: parseByte(),
-      headYaw: parseByte(),
-      velocityX: parseShort(),
-      velocityY: parseShort(),
-      velocityZ: parseShort(),
-    });
-
-    return new LivingEntitySpawnedEvent(data);
-  }
+  public static readonly schema: EventSchema<Payload> = {
+    id: parseVarInt(),
+    uuid: parseUUID(),
+    type: parseVarInt(),
+    x: parseDouble(),
+    y: parseDouble(),
+    z: parseDouble(),
+    yaw: parseByte(),
+    pitch: parseByte(),
+    headYaw: parseByte(),
+    velocityX: parseShort(),
+    velocityY: parseShort(),
+    velocityZ: parseShort(),
+  };
 }

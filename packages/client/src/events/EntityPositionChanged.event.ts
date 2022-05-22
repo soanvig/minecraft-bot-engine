@@ -1,6 +1,5 @@
-import { Packet } from 'protocol';
-import { parsePacketData, parseVarInt, parseBoolean, parseShort } from '../parsePacket'
-import { IEvent } from './types';
+import { parseVarInt, parseBoolean, parseShort } from '../parsePacket'
+import { EventSchema, IEvent } from './types';
 
 interface Payload {
   id: number;
@@ -11,17 +10,13 @@ interface Payload {
 }
 
 export class EntityPositionChangedEvent implements IEvent {
-  private constructor (public readonly payload: Payload) {}
+  public constructor (public readonly payload: Payload) {}
 
-  public static async fromPacket(packet: Packet) {
-    const [data] = parsePacketData(packet.data, {
-      id: parseVarInt(),
-      deltaX: parseShort(),
-      deltaY: parseShort(),
-      deltaZ: parseShort(),
-      onGround: parseBoolean(),
-    });
-
-    return new EntityPositionChangedEvent(data);
-  }
+  public static readonly schema: EventSchema<Payload> = {
+    id: parseVarInt(),
+    deltaX: parseShort(),
+    deltaY: parseShort(),
+    deltaZ: parseShort(),
+    onGround: parseBoolean(),
+  };
 }

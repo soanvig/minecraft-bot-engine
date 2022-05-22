@@ -9,6 +9,7 @@ import { PlayerInfoReceivedEvent } from './events/PlayerInfoReceived.event';
 import { PlayerPositionChangedEvent } from './events/PlayerPositionChanged.event';
 import { PlayerSpawnedEvent } from './events/PlayerSpawned.event';
 import { EventCtor, IEvent } from './events/types';
+import { parsePacketData } from './parsePacket';
 
 const packetToEvent: Record<number, EventCtor<any>> = {
   0x02: LivingEntitySpawnedEvent,
@@ -36,9 +37,14 @@ class Client extends StatePlay {
 
     if (packet.id in packetToEvent) {
       const eventCtor = packetToEvent[packet.id];
-      const event = await eventCtor.fromPacket(packet);
-
-      this.publishEvent(eventCtor, event);
+      if ('fromPacket' in eventCtor) {
+        this.publishEvent(eventCtor, eventCtor.fromPacket(packet));
+      } else {
+        this.publishEvent(
+          eventCtor,
+          new eventCtor(parsePacketData(packet.data, eventCtor.schema))
+        );
+      }
     }
   }
 

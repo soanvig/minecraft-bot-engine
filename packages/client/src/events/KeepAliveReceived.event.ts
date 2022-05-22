@@ -1,16 +1,14 @@
-import { Packet } from 'protocol';
-import { IEvent } from './types';
+import { parseWholeBuffer } from '../parsePacket';
+import { EventSchema, IEvent } from './types';
 
 interface Payload {
   id: Buffer;
 }
 
 export class KeepAliveReceivedEvent implements IEvent {
-  private constructor (public readonly payload: Payload) {}
+  public constructor (public readonly payload: Payload) {}
 
-  public static async fromPacket(packet: Packet) {
-    const id = packet.data;
-
-    return new KeepAliveReceivedEvent({ id });
-  }
+  public static readonly schema: EventSchema<Payload> = {
+    id: parseWholeBuffer()
+  };
 }
