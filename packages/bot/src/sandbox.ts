@@ -1,5 +1,5 @@
-import { PlayerInfoReceivedEvent } from 'client';
 import { Client } from 'client';
+import { Bot } from '.';
 
 const client = new Client({
   host: 'localhost',
@@ -7,18 +7,8 @@ const client = new Client({
   username: 'Bot4',
 });
 
-// client.addListener(PlayerSpawnedEvent, console.log);
-// client.addListener(PlayerPositionChangedEvent, console.log);
-// client.addListener(EntityPositionRotationChangedEvent, console.log);
-// client.addListener(EntityPositionChangedEvent, console.log);
-// client.addListener(EntityRotationChangedEvent, console.log);
-client.addListener(PlayerInfoReceivedEvent, console.log);
-// client.addListener(ChunkUpdatedEvent, (event) => {
-//   console.log(JSON.stringify(event.payload, (key, value) =>
-//   typeof value === 'bigint'
-//       ? value.toString()
-//       : value // return everything else unchanged
-//   ), 2);
-//   process.exit(0);
-// });
+const bot = new Bot(client);
 
+client.connect();
+
+setTimeout(() => console.log(bot.players.players), 5000);

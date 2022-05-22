@@ -22,3 +22,4 @@ client.addListener(PlayerInfoReceivedEvent, console.log);
 //   process.exit(0);
 // });
 
+client.connect();
