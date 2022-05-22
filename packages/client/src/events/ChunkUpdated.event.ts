@@ -1,5 +1,5 @@
-import { Packet, parsePacketData, parseBuffer, parseVarInt, parseInt, parseNBT, parseByteArray, parseIterate, parseObject, parseShort } from 'protocol';
-import { SmartBuffer } from 'smart-buffer';
+import { Packet } from 'protocol';
+import { parsePacketData, parseBuffer, parseVarInt, parseInt, parseNBT, parseByteArray, parseIterate, parseObject, parseShort } from '../parsePacket';
 import { IEvent } from './types';
 
 interface Payload {

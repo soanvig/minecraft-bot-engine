@@ -1,4 +1,4 @@
-import { Packet  } from 'protocol';
+import { Packet } from 'protocol';
 import { IEvent } from './types';
 
 interface Payload {

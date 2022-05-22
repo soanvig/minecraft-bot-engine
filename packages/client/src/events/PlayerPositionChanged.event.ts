@@ -1,4 +1,5 @@
-import { Packet, parsePacketData, parseDouble, parseFloat, parseBuffer, parseVarInt, parseBoolean } from 'protocol';
+import { Packet } from 'protocol';
+import { parsePacketData, parseDouble, parseFloat, parseBuffer, parseVarInt, parseBoolean } from '../parsePacket'
 import { IEvent } from './types';
 
 interface Payload {

@@ -1,4 +1,5 @@
-import { Packet, parsePacketData, parseVarInt, parseBoolean, parseIterate, parseUUID, parseString, parseObject, SmartBuffer } from 'protocol';
+import { Packet, SmartBuffer } from 'protocol';
+import { parsePacketData, parseVarInt, parseBoolean, parseIterate, parseUUID, parseString, parseObject } from '../parsePacket';
 import { IEvent } from './types';
 
 interface PlayerInfoHeader {
@@ -34,6 +35,18 @@ type PlayerDisplayNameUpdatedPayload = {
 type PlayerLeftPayload = {
   uuid: string;
 }[];
+
+const parsePlayers = (props: any) => {
+  return {
+    playersCount: parseVarInt(),
+    player: (b: SmartBuffer, ctx: any) => {
+      return parseIterate(ctx.playersCount, parseObject({
+        uuid: parseUUID(),
+
+      }))
+    }
+  }
+}
 
 export class PlayersJoinedEvent implements IEvent {
   private constructor (public readonly payload: PlayerJoinedPayload) {}

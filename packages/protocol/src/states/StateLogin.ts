@@ -1,5 +1,4 @@
 import { Packet } from '../packets/packet';
-import { parseBuffer, parsePacketData, parseString, parseVarInt } from '../packets/parsePacket';
 import { SmartBuffer } from '../SmartBuffer';
 import { State, StateId } from './State';
 
@@ -18,22 +17,18 @@ export class StateLogin extends State {
 
   public async receive (packet: Packet): Promise<void> {
     if (packet.id === 3) {
-      const [{ maxPacketSize }] = parsePacketData(packet.data, {
-        maxPacketSize: parseVarInt(),
-      })
+      const maxPacketSize = SmartBuffer.fromBuffer(packet.data).readVarInt();
 
       this.enableCompression(maxPacketSize);
     }
 
     if (packet.id === 2) {
-      const [result] = parsePacketData(packet.data, {
-        // md5(OfflinePlayer:Nickname)
-        uuid: parseBuffer(16),
-        nickname: parseString(),
-      })
+      const sb = SmartBuffer.fromBuffer(packet.data);
+      const uuid = sb.readBuffer(16);
+      const nickname = sb.readString(sb.readVarInt());
 
-      console.log('Login uuid', result.uuid.toString('hex'));
-      console.log('Login nickname', result.nickname);
+      console.log('Login uuid', uuid.toString('hex'));
+      console.log('Login nickname', nickname);
 
       this.switchTo(StateId.Play);
     }

@@ -380,6 +380,7 @@ __metadata:
   resolution: "client@workspace:packages/client"
   dependencies:
     "@types/node": ^17.0.31
+    nbt: "workspace:"
     protocol: "workspace:^"
     rxjs: ^7.5.5
     smart-buffer: ^4.2.0

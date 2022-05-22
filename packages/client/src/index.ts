@@ -1,11 +1,11 @@
-import { Packet, StatePlay, protocol, SmartBuffer } from 'protocol';
+import { Packet, StatePlay, protocol } from 'protocol';
 import { ChunkUpdatedEvent } from './events/ChunkUpdated.event';
 import { EntityPositionChangedEvent } from './events/EntityPositionChanged.event';
 import { EntityPositionRotationChangedEvent } from './events/EntityPositionRotationChanged.event';
 import { EntityRotationChangedEvent } from './events/EntityRotationChanged.event';
 import { KeepAliveReceivedEvent } from './events/KeepAliveReceived.event';
 import { LivingEntitySpawnedEvent } from './events/LivingEntitySpawned.event';
-import { PlayerInfoReceivedEvent, PlayersJoinedEvent } from './events/PlayerInfoReceived.event';
+import { PlayerInfoReceivedEvent } from './events/PlayerInfoReceived.event';
 import { PlayerPositionChangedEvent } from './events/PlayerPositionChanged.event';
 import { PlayerSpawnedEvent } from './events/PlayerSpawned.event';
 import { EventCtor, IEvent } from './events/types';

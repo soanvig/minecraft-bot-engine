@@ -1,4 +1,4 @@
-import { SmartBuffer } from '../SmartBuffer';
+import { SmartBuffer } from 'protocol';
 import { decodeNBT } from 'nbt';
 import { times } from './utils';
 

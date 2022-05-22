@@ -579,6 +579,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["client", "workspace:packages/client"],\
             ["@types/node", "npm:17.0.31"],\
+            ["nbt", "workspace:packages/nbt"],\
             ["protocol", "workspace:packages/protocol"],\
             ["rxjs", "npm:7.5.5"],\
             ["smart-buffer", "npm:4.2.0"],\
