@@ -1,4 +1,4 @@
-import { Packet, StatePlay, protocol } from 'protocol';
+import { Packet, StatePlay, protocol, ProtocolConfig } from 'protocol';
 import { ChunkUpdatedEvent } from './events/ChunkUpdated.event';
 import { EntityPositionChangedEvent } from './events/EntityPositionChanged.event';
 import { EntityPositionRotationChangedEvent } from './events/EntityPositionRotationChanged.event';
@@ -26,6 +26,15 @@ const packetToEvent: Record<number, EventCtor<any>> = {
 
 class Client extends StatePlay {
   private eventHandlers: Map<EventCtor<any>, ((event: IEvent) => void)[]> = new Map();
+
+  public constructor(config: Omit<ProtocolConfig, 'playHandler'>) {
+    super();
+
+    protocol({
+      ...config,
+      playHandler: this,
+    });
+  }
 
   public async receive (packet: Packet): Promise<void> {
     if (packet.id === 0x21) {
@@ -77,7 +86,11 @@ class Client extends StatePlay {
   }
 }
 
-const client = new Client();
+const client = new Client({
+  host: 'localhost',
+  port: 25565,
+  username: 'Bot4',
+});
 
 // client.addListener(PlayerSpawnedEvent, console.log);
 // client.addListener(PlayerPositionChangedEvent, console.log);
@@ -94,9 +107,4 @@ client.addListener(PlayerInfoReceivedEvent, console.log);
 //   process.exit(0);
 // });
 
-protocol({
-  host: 'localhost',
-  port: 25565,
-  username: 'Bot4',
-  playHandler: client,
-});
+
