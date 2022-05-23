@@ -1,5 +1,5 @@
 import { Client } from 'client';
-import { Bot } from '.';
+import { PluginPlayers } from './plugins/PluginPlayers';
 
 const client = new Client({
   host: 'localhost',
@@ -7,9 +7,9 @@ const client = new Client({
   username: 'Bot4',
 });
 
-const bot = new Bot(client);
+const players = new PluginPlayers(client);
 
 client.connect();
 
-setTimeout(() => console.log(bot.players.players), 10000);
-setTimeout(() => console.log(bot.players.positions), 10000);
+setTimeout(() => console.log(players.players), 10000);
+setTimeout(() => console.log(players.positions), 10000);
