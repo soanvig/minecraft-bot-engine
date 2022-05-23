@@ -11,4 +11,5 @@ const bot = new Bot(client);
 
 client.connect();
 
-setTimeout(() => console.log(bot.players.players), 5000);
+setTimeout(() => console.log(bot.players.players), 10000);
+setTimeout(() => console.log(bot.players.positions), 10000);

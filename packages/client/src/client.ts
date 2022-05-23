@@ -41,9 +41,11 @@ export class Client extends StatePlay {
         const event = eventCtor.fromPacket(packet);
         this.publishEvent(event.constructor, event);
       } else {
+        const [data] = parsePacketData(packet.data, eventCtor.schema);
+
         this.publishEvent(
           eventCtor,
-          new eventCtor(parsePacketData(packet.data, eventCtor.schema))
+          new eventCtor(data)
         );
 
       }
