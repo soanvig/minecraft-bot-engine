@@ -1,5 +1,6 @@
-import { Packet, StatePlay, protocol, ProtocolConfig } from 'protocol';
-import { EventCtor, LivingEntitySpawnedEvent, PlayerSpawnedEvent, KeepAliveReceivedEvent, ChunkUpdatedEvent, EntityPositionChangedEvent, EntityPositionRotationChangedEvent, EntityRotationChangedEvent, PlayerInfoReceivedEvent, PlayerPositionChangedEvent, IEvent, PlayersJoinedEvent } from './events';
+import { Packet, Protocol, protocol, ProtocolConfig } from 'protocol';
+import { Subscription } from 'rxjs';
+import { EventCtor, LivingEntitySpawnedEvent, PlayerSpawnedEvent, KeepAliveReceivedEvent, EntityPositionChangedEvent, EntityPositionRotationChangedEvent, EntityRotationChangedEvent, PlayerInfoReceivedEvent, PlayerPositionChangedEvent, IEvent} from './events';
 import { parsePacketData } from './parsePacket';
 
 const packetToEvent: Record<number, EventCtor<any>> = {
@@ -11,61 +12,32 @@ const packetToEvent: Record<number, EventCtor<any>> = {
   0x29: EntityPositionChangedEvent,
   0x2A: EntityPositionRotationChangedEvent,
   0x2B: EntityRotationChangedEvent,
-  /** @NOTE this packet behaves very strange. It should make action 0 when players joins but it doesn't */
   0x36: PlayerInfoReceivedEvent,
   0x38: PlayerPositionChangedEvent,
 }
 
-export class Client extends StatePlay {
-  private eventHandlers: Map<EventCtor<any>, ((event: IEvent) => void)[]> = new Map();
-  private isConnected = false;
+type EventHandlers = Map<EventCtor<any>, ((event: IEvent) => void)[]>;
+
+export class Client {
+  private eventHandlers: EventHandlers = new Map();
+
+  private protocol!: Protocol;
+  private packetSubscription!: Subscription;
 
   public constructor(
-    private protocolConfig: Omit<ProtocolConfig, 'playHandler'>
-  ) {
-    super();
-  }
+    private protocolConfig: ProtocolConfig
+  ) {}
 
-  public async receive (packet: Packet): Promise<void> {
-    if (packet.id === 0x21) {
-      this.send({
-        id: 0x0F,
-        data: packet.data,
-      });   
-    }
-
-    if (packet.id in packetToEvent) {
-      const eventCtor = packetToEvent[packet.id];
-      if ('fromPacket' in eventCtor) {
-        // This can return different event actually
-        const event = eventCtor.fromPacket(packet);
-        this.publishEvent(event.constructor, event);
-      } else {
-        const [data] = parsePacketData(packet.data, eventCtor.schema);
-
-        this.publishEvent(
-          eventCtor,
-          new eventCtor(data)
-        );
-
-      }
-    }
-  }
-
-  public connect(): void {
-    if (this.isConnected) {
+  public async connect(): Promise<void> {
+    if (this.protocol) {
       throw new Error('Client is already connected');
     }
 
-    protocol({
-      ...this.protocolConfig,
-      playHandler: this,
+    this.protocol = await protocol(this.protocolConfig);
+
+    this.packetSubscription = this.protocol.packets.subscribe({
+      next: p => this.receive(p)
     });
-
-    this.isConnected = true;
-  }
-
-  public async onSwitchTo (): Promise<void> {
   }
 
   /**
@@ -85,6 +57,33 @@ export class Client extends StatePlay {
     const handlers = this.eventHandlers.get(event) ?? [];
 
     this.eventHandlers.set(event, handlers.filter(h => h !== handler));
+  }
+
+  private async receive (packet: Packet): Promise<void> {
+    if (packet.id === 0x21) {
+      /** Keep alive */
+      this.protocol.send({
+        id: 0x0F,
+        data: packet.data,
+      });
+    }
+
+    if (packet.id in packetToEvent) {
+      const eventCtor = packetToEvent[packet.id];
+      if ('fromPacket' in eventCtor) {
+        // This can return different event actually
+        // therefore we publish created constructor, not eventCtor
+        const event = eventCtor.fromPacket(packet);
+        this.publishEvent(event.constructor, event);
+      } else {
+        const [data] = parsePacketData(packet.data, eventCtor.schema);
+
+        this.publishEvent(
+          eventCtor,
+          new eventCtor(data)
+        );
+      }
+    }
   }
 
   private publishEvent(eventCtor: EventCtor<any>, event: IEvent) {
