@@ -1,6 +1,7 @@
 import { Packet, Protocol, protocol, ProtocolConfig } from 'protocol';
 import { Subscription } from 'rxjs';
 import { EventCtor, LivingEntitySpawnedEvent, PlayerSpawnedEvent, KeepAliveReceivedEvent, EntityPositionChangedEvent, EntityPositionRotationChangedEvent, EntityRotationChangedEvent, PlayerInfoReceivedEvent, PlayerPositionChangedEvent, IEvent} from './events';
+import { ConnectedEvent } from './events/internal-events';
 import { parsePacketData } from './parsePacket';
 
 const packetToEvent: Record<number, EventCtor<any>> = {
@@ -36,8 +37,20 @@ export class Client {
     this.protocol = await protocol(this.protocolConfig);
 
     this.packetSubscription = this.protocol.packets.subscribe({
-      next: p => this.receive(p)
+      next: p => this.handlePacket(p)
     });
+
+    this.publishEvent(ConnectedEvent, new ConnectedEvent({
+      uuid: this.protocol.uuid,
+      name: this.protocol.name,
+    }));
+  }
+
+  public getCurrentPlayerData() {
+    return {
+      uuid: this.protocol.uuid,
+      name: this.protocol.name,
+    }
   }
 
   /**
@@ -59,7 +72,7 @@ export class Client {
     this.eventHandlers.set(event, handlers.filter(h => h !== handler));
   }
 
-  private async receive (packet: Packet): Promise<void> {
+  private async handlePacket (packet: Packet): Promise<void> {
     if (packet.id === 0x21) {
       /** Keep alive */
       this.protocol.send({
