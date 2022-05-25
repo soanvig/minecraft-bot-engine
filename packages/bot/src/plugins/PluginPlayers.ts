@@ -1,4 +1,4 @@
-import { Client, EntityPositionChangedEvent, EntityPositionRotationChangedEvent, PlayersJoinedEvent, PlayersLeftEvent, PlayerSpawnedEvent } from 'client';
+import { Client, ConnectedEvent, EntityPositionChangedEvent, EntityPositionRotationChangedEvent, PlayersJoinedEvent, PlayersLeftEvent, PlayerSpawnedEvent } from 'client';
 
 export type Player = { uuid: string; name: string };
 export type Position = { x: number; y: number; z: number };
@@ -9,14 +9,22 @@ export class PluginPlayers {
   private entityIdToUUID: Record<number, string> = {};
 
   constructor (client: Client) {
-    client.addListener(PlayersJoinedEvent, e => this.playersJoinedHandler(e));
-    client.addListener(PlayersLeftEvent, e => this.playersLeftHandler(e));
-    client.addListener(PlayerSpawnedEvent, e => this.playerSpawnedHandler(e));
-    client.addListener(EntityPositionChangedEvent, e => this.entityPositionChanged(e));
-    client.addListener(EntityPositionRotationChangedEvent, e => this.entityPositionChanged(e));
+    client.addListener(ConnectedEvent, this.connectedHandler)
+    client.addListener(PlayersJoinedEvent, this.playersJoinedHandler);
+    client.addListener(PlayersLeftEvent, this.playersLeftHandler);
+    client.addListener(PlayerSpawnedEvent, this.playerSpawnedHandler);
+    client.addListener(EntityPositionChangedEvent, this.entityPositionChanged);
+    client.addListener(EntityPositionRotationChangedEvent, this.entityPositionChanged);
   }
 
-  private playersJoinedHandler (e: PlayersJoinedEvent): void {
+  private connectedHandler = (e: ConnectedEvent): void => {
+    this.players[e.payload.uuid] = {
+      name: e.payload.name,
+      uuid: e.payload.uuid,
+    }
+  }
+
+  private playersJoinedHandler = (e: PlayersJoinedEvent): void => {
     e.payload.players.forEach(p => {
       this.players[p.uuid] = {
         uuid: p.uuid,
@@ -25,13 +33,13 @@ export class PluginPlayers {
     });
   }
 
-  private playersLeftHandler (e: PlayersLeftEvent): void {
+  private playersLeftHandler = (e: PlayersLeftEvent): void => {
     e.payload.players.forEach(p => {
       delete this.players[p.uuid];
     });
   }
 
-  private playerSpawnedHandler ({ payload }: PlayerSpawnedEvent): void {
+  private playerSpawnedHandler = ({ payload }: PlayerSpawnedEvent): void => {
     this.entityIdToUUID[payload.id] = payload.uuid;
     this.positions[payload.uuid] = {
       x: payload.x,
@@ -40,7 +48,7 @@ export class PluginPlayers {
     }
   }
 
-  private entityPositionChanged (e: EntityPositionChangedEvent | EntityPositionRotationChangedEvent): void {
+  private entityPositionChanged = (e: EntityPositionChangedEvent | EntityPositionRotationChangedEvent): void => {
     const uuid = this.entityIdToUUID[e.payload.id];
     const player = this.positions[uuid];
 
