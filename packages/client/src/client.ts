@@ -1,4 +1,4 @@
-import { Packet, Protocol, protocol, ProtocolConfig } from 'protocol';
+import { Packet, Protocol, protocol, ProtocolConfig, SmartBuffer } from 'protocol';
 import { Subscription } from 'rxjs';
 import { ICommand } from '.';
 import { EventCtor, LivingEntitySpawnedEvent, PlayerSpawnedEvent, KeepAliveReceivedEvent, EntityPositionChangedEvent, EntityPositionRotationChangedEvent, EntityRotationChangedEvent, PlayerInfoReceivedEvent, PlayerPositionChangedEvent, GameJoinedEvent, IEvent } from './events';
@@ -29,7 +29,17 @@ export class Client {
 
   public constructor(
     private protocolConfig: ProtocolConfig
-  ) {}
+  ) {
+    /** @TODO move this and keep alive to some more reasonable place */
+    this.addListener(PlayerPositionChangedEvent, e => {
+      this.protocol.send({
+        id: 0x00,
+        data: new SmartBuffer()
+          .writeVarInt(e.payload.teleportId)
+          .toBuffer(),
+      })
+    });
+  }
 
   public async connect(): Promise<void> {
     if (this.internalProtocol) {
