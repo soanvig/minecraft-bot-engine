@@ -12,11 +12,10 @@ export class PacketManager {
   private socketObservable: Observable<Packet>;
   private writer: Subject<Packet> = new Subject();
   private writerSubscription: Subscription;
-  private compressionThreshold = -1;
   private decoder: Decoder;
   private encoder: Encoder;
 
-  constructor (socket: Socket) {
+  constructor (socket: Socket, private debug: boolean) {
     this.decoder = decodePacket;
     this.encoder = encodePacket;
 
@@ -35,12 +34,14 @@ export class PacketManager {
   }
 
   public send (packet: Packet) {
+    if (this.debug) {
+      console.debug(`Sending packet: 0x${packet.id.toString(16).padStart(2, '0')}`)
+    }
+
     this.writer.next(packet);
   }
 
   public setCompressionThreshold (threshold: number) {
-    this.compressionThreshold = threshold;
-
     if (threshold >= 0) {
       this.encoder = encodeCompressedPacket(threshold);
       this.decoder = decodeCompressedPacket(threshold);

@@ -9,6 +9,7 @@ export interface ProtocolConfig {
   host: string;
   port: number;
   username: string;
+  debug?: boolean;
 }
 
 export interface Protocol {
@@ -24,7 +25,7 @@ export const protocol = (config: ProtocolConfig): Promise<Protocol> => new Promi
   socket.on('connect', () => {
     console.log('Connected');
 
-    const packetManager = new PacketManager(socket);
+    const packetManager = new PacketManager(socket, config.debug ?? false);
     const handshakePacket = createHandshakePacket({
       host: config.host,
       port: config.port,
