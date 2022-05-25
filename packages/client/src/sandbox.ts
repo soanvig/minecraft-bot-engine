@@ -1,4 +1,4 @@
-import { PlayerSpawnedEvent, PlayerPositionChangedEvent} from './events';
+import { PlayerSpawnedEvent, PlayerPositionChangedEvent, GameJoinedEvent } from './events';
 import { Client } from './client';
 
 const client = new Client({
@@ -9,6 +9,7 @@ const client = new Client({
 
 client.addListener(PlayerSpawnedEvent, console.log);
 client.addListener(PlayerPositionChangedEvent, console.log);
+client.addListener(GameJoinedEvent, console.log);
 // client.addListener(EntityPositionRotationChangedEvent, console.log);
 // client.addListener(EntityPositionChangedEvent, console.log);
 // client.addListener(EntityRotationChangedEvent, console.log);
