@@ -1,4 +1,4 @@
-import { Client, ConnectedEvent, EntityPositionChangedEvent, EntityPositionRotationChangedEvent, PlayersJoinedEvent, PlayersLeftEvent, PlayerSpawnedEvent } from 'client';
+import { Client, ConnectedEvent, EntityPositionChangedEvent, EntityPositionRotationChangedEvent, GameJoinedEvent, PlayerPositionChangedEvent, PlayersJoinedEvent, PlayersLeftEvent, PlayerSpawnedEvent } from 'client';
 
 export type Player = { uuid: string; name: string };
 export type Position = { x: number; y: number; z: number };
@@ -6,10 +6,13 @@ export type Position = { x: number; y: number; z: number };
 export class PluginPlayers {
   public players: Record<string, Player> = {};
   public positions: Record<string, Position> = {};
+  public currentPlayer!: Player;
   private entityIdToUUID: Record<number, string> = {};
 
   constructor (client: Client) {
     client.addListener(ConnectedEvent, this.connectedHandler)
+    client.addListener(GameJoinedEvent, this.gameJoinedHandler)
+    client.addListener(PlayerPositionChangedEvent, this.playerPositionChanged)
     client.addListener(PlayersJoinedEvent, this.playersJoinedHandler);
     client.addListener(PlayersLeftEvent, this.playersLeftHandler);
     client.addListener(PlayerSpawnedEvent, this.playerSpawnedHandler);
@@ -18,10 +21,25 @@ export class PluginPlayers {
   }
 
   private connectedHandler = (e: ConnectedEvent): void => {
-    this.players[e.payload.uuid] = {
+    const data = {
       name: e.payload.name,
       uuid: e.payload.uuid,
-    }
+    };
+
+    this.players[e.payload.uuid] = data;
+    this.currentPlayer = data;
+  }
+
+  private gameJoinedHandler = (e: GameJoinedEvent): void => {
+    this.entityIdToUUID[e.payload.entityId] = this.currentPlayer.uuid;
+  }
+
+  private playerPositionChanged = (e: PlayerPositionChangedEvent): void => {
+    this.positions[this.currentPlayer.uuid] = {
+      x: e.payload.x,
+      y: e.payload.y,
+      z: e.payload.z,
+    };
   }
 
   private playersJoinedHandler = (e: PlayersJoinedEvent): void => {
