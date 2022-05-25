@@ -1,5 +1,6 @@
 import { Packet, Protocol, protocol, ProtocolConfig } from 'protocol';
 import { Subscription } from 'rxjs';
+import { ICommand } from '.';
 import { EventCtor, LivingEntitySpawnedEvent, PlayerSpawnedEvent, KeepAliveReceivedEvent, EntityPositionChangedEvent, EntityPositionRotationChangedEvent, EntityRotationChangedEvent, PlayerInfoReceivedEvent, PlayerPositionChangedEvent, IEvent} from './events';
 import { ConnectedEvent } from './events/internal-events';
 import { parsePacketData } from './parsePacket';
@@ -22,7 +23,7 @@ type EventHandlers = Map<EventCtor<any>, ((event: IEvent) => void)[]>;
 export class Client {
   private eventHandlers: EventHandlers = new Map();
 
-  private protocol!: Protocol;
+  private internalProtocol: Protocol | null = null;
   private packetSubscription!: Subscription;
 
   public constructor(
@@ -30,11 +31,11 @@ export class Client {
   ) {}
 
   public async connect(): Promise<void> {
-    if (this.protocol) {
+    if (this.internalProtocol) {
       throw new Error('Client is already connected');
     }
 
-    this.protocol = await protocol(this.protocolConfig);
+    this.internalProtocol = await protocol(this.protocolConfig);
 
     this.packetSubscription = this.protocol.packets.subscribe({
       next: p => this.handlePacket(p)
@@ -44,6 +45,10 @@ export class Client {
       uuid: this.protocol.uuid,
       name: this.protocol.name,
     }));
+  }
+
+  public send(command: ICommand): void {
+    this.protocol.send(command.toPacket());
   }
 
   public getCurrentPlayerData() {
@@ -70,6 +75,14 @@ export class Client {
     const handlers = this.eventHandlers.get(event) ?? [];
 
     this.eventHandlers.set(event, handlers.filter(h => h !== handler));
+  }
+
+  private get protocol() {
+    if (!this.internalProtocol) {
+      throw new Error('Client not connected');
+    }
+
+    return this.internalProtocol;
   }
 
   private async handlePacket (packet: Packet): Promise<void> {

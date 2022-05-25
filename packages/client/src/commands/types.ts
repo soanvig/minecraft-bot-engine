@@ -1,1 +1,5 @@
-export type ICommand = {}
+import { Packet } from 'protocol';
+
+export interface ICommand {
+  toPacket(): Packet;
+}

@@ -8,3 +8,4 @@ export * from './LivingEntitySpawned.event';
 export * from './PlayerInfoReceived.event';
 export * from './PlayerPositionChanged.event';
 export * from './PlayerSpawned.event';
+export * from './internal-events';
