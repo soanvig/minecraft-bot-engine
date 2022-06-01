@@ -7,7 +7,7 @@ const client = new Client({
   host: 'localhost',
   port: 25565,
   username: 'Bot4',
-  debug: true,
+  debug: false,
 });
 
 const players = new PluginPlayers(client);
@@ -17,4 +17,4 @@ const move = new PluginMove(client, players, position);
 client.connect();
 
 setTimeout(() => console.log(players.players), 10000);
-setInterval(() => move.moveForwardX(0.5), 500);
+setTimeout(() => move.startFollowingByName('BlackHedgecat'), 5000);

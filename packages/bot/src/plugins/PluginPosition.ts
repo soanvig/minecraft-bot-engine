@@ -1,10 +1,9 @@
 import { Client, EntityPositionChangedEvent, EntityPositionRotationChangedEvent, PlayerPositionChangedEvent, PlayerSpawnedEvent } from 'client';
+import { Vec3 } from '../vec3';
 import { PluginPlayers } from './PluginPlayers';
 
-export type Position = { x: number; y: number; z: number };
-
 export class PluginPosition {
-  private positions: Record<string, Position> = {};
+  private positions: Record<string, Vec3> = {};
 
   constructor(
     private client: Client,
@@ -16,28 +15,28 @@ export class PluginPosition {
     client.addListener(PlayerSpawnedEvent, this.playerSpawnedHandler);
   }
 
-  public getPlayerPosition(uuid: string): Position | null {
+  public getPlayerPosition(uuid: string): Vec3 | null {
     return this.positions[uuid] ?? null;
   }
 
-  public updatePlayerPosition(uuid: string, position: Position): void {
+  public updatePlayerPosition(uuid: string, position: Vec3): void {
     this.positions[uuid] = position;
   }
 
   private playerPositionChanged = (e: PlayerPositionChangedEvent): void => {
-    this.positions[this.players.currentPlayer.uuid] = {
-      x: e.payload.x,
-      y: e.payload.y,
-      z: e.payload.z,
-    };
+    this.positions[this.players.currentPlayer.uuid] = new Vec3(
+      e.payload.x,
+      e.payload.y,
+      e.payload.z,
+    );
   }
 
   private playerSpawnedHandler = ({ payload }: PlayerSpawnedEvent): void => {
-    this.positions[payload.uuid] = {
-      x: payload.x,
-      y: payload.y,
-      z: payload.z,
-    }
+    this.positions[payload.uuid] = new Vec3(
+      payload.x,
+      payload.y,
+      payload.z,
+    );
   }
 
   private entityPositionChanged = (e: EntityPositionChangedEvent | EntityPositionRotationChangedEvent): void => {
@@ -53,8 +52,10 @@ export class PluginPosition {
       return;
     }
 
-    player.x = (e.payload.deltaX / 128 + player.x * 32) / 32;
-    player.y = (e.payload.deltaY / 128 + player.y * 32) / 32;
-    player.z = (e.payload.deltaZ / 128 + player.z * 32) / 32;
+    this.positions[uuid] = new Vec3(
+      (e.payload.deltaX / 128 + player.x * 32) / 32,
+      (e.payload.deltaY / 128 + player.y * 32) / 32,
+      (e.payload.deltaZ / 128 + player.z * 32) / 32
+    )
   }
 }

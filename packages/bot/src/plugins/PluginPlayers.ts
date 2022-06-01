@@ -13,7 +13,12 @@ export class PluginPlayers {
     client.addListener(PlayersJoinedEvent, this.playersJoinedHandler);
     client.addListener(PlayersLeftEvent, this.playersLeftHandler);
     client.addListener(PlayerSpawnedEvent, this.playerSpawnedHandler);
-   
+  }
+
+  public getPlayerByName(name: string): Player | null {
+    const players = Object.values(this.players);
+
+    return players.find(p => p.name === name) ?? null;
   }
 
   public getPlayerUUIDByEntityId (entityId: number): string | null {
