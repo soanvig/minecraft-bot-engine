@@ -1,7 +1,7 @@
 import { Packet, Protocol, protocol, ProtocolConfig, SmartBuffer } from 'protocol';
 import { Subscription } from 'rxjs';
 import { ICommand } from '.';
-import { EventCtor, LivingEntitySpawnedEvent, PlayerSpawnedEvent, KeepAliveReceivedEvent, EntityPositionChangedEvent, EntityPositionRotationChangedEvent, EntityRotationChangedEvent, PlayerInfoReceivedEvent, PlayerPositionChangedEvent, GameJoinedEvent, IEvent } from './events';
+import { EventCtor, LivingEntitySpawnedEvent, PlayerSpawnedEvent, KeepAliveReceivedEvent, EntityPositionChangedEvent, EntityPositionRotationChangedEvent, EntityRotationChangedEvent, PlayerInfoReceivedEvent, PlayerPositionChangedEvent, GameJoinedEvent, ChunkUpdatedEvent, IEvent } from './events';
 import { ConnectedEvent } from './events/internal-events';
 import { parsePacketData } from './parsePacket';
 
@@ -9,8 +9,7 @@ const packetToEvent: Record<number, EventCtor<any>> = {
   0x02: LivingEntitySpawnedEvent,
   0x04: PlayerSpawnedEvent,
   0x21: KeepAliveReceivedEvent,
-  /** @NOTE in progress */
-  // 0x22: ChunkUpdatedEvent,
+  0x22: ChunkUpdatedEvent,
   0x26: GameJoinedEvent,
   0x29: EntityPositionChangedEvent,
   0x2A: EntityPositionRotationChangedEvent,

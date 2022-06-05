@@ -2,6 +2,7 @@ import { Client } from 'client';
 import { PluginMove } from './plugins/PluginMove';
 import { PluginPlayers } from './plugins/PluginPlayers';
 import { PluginPosition } from './plugins/PluginPosition';
+import { PluginWorld } from './plugins/PluginWorld';
 
 const client = new Client({
   host: 'localhost',
@@ -13,6 +14,7 @@ const client = new Client({
 const players = new PluginPlayers(client);
 const position = new PluginPosition(client, players);
 const move = new PluginMove(client, players, position);
+const world = new PluginWorld(client);
 
 client.connect();
 
