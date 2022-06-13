@@ -8,6 +8,10 @@ export class PluginWorld {
   }
 
   private chunkUpdated = (e: ChunkUpdatedEvent) => {
-    console.log(e.payload.dataSections);
+    console.log(
+      e.payload.dataSections.palleteBitsPerEntry,
+      e.payload.dataSections.pallete,
+      e.payload.dataSections.dataArray.map((a: any) => a.toString(2).match(/.{4}/g))
+    )
   }
 }

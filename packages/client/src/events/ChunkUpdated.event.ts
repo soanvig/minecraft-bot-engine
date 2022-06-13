@@ -40,8 +40,15 @@ export class ChunkUpdatedEvent implements IEvent {
       const palleteBitsPerEntry = data.readUInt8();
       const paletteLength = data.readVarInt();
       const pallete = times(paletteLength, () => b.readVarInt());
+      const dataArrayLength = data.readVarInt();
+      const dataArray = times(dataArrayLength, () => data.readBigInt64BE());
 
-      return pallete;
+
+      return {
+        palleteBitsPerEntry,
+        pallete,
+        dataArray,
+      };
     }
     // blockEntitiesCount: parseVarInt(),
     // blockEntities: (b: SmartBuffer, ctx: any) =>
